@@ -3,73 +3,74 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Design Editor V1.29.0 Anti Crash</title>
+<title>Design Editor V1.30.0 Mobile Pro</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root { --primary: #4f46e5; --bg-color: #f1f5f9; --canvas-bg: #e2e8f0; --toolbar-bg: #ffffff; --text-main: #1e293b; --border: #cbd5e1; --success: #10b981; }
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
 body { background: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 .view-section { display: none; flex: 1; flex-direction: column; padding: 16px; }
 .view-section.active { display: flex; }
-button { background: var(--primary); color: #fff; border: none; border-radius: 8px; padding: 10px 14px; font-weight: 600; cursor: pointer; transition: .2s; }
+button { background: var(--primary); color: #fff; border: none; border-radius: 8px; padding: 12px 16px; font-weight: 600; cursor: pointer; transition: .2s; font-size: 0.95rem; }
 button:active { transform: scale(.95); }
 button:disabled { opacity: .7; cursor: not-allowed; }
 .btn-outline { background: 0 0; color: var(--primary); border: 1px solid var(--primary); }
 .dashboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; max-width: 800px; margin-inline: auto; }
-.card-menu { background: #fff; border-radius: 12px; padding: 16px; text-align: center; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,.05); cursor: pointer; }
-.card-menu .icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+.card-menu { background: #fff; border-radius: 12px; padding: 20px 16px; text-align: center; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,.05); cursor: pointer; }
+.card-menu .icon { font-size: 2.5rem; margin-bottom: 8px; display: block; }
 .card { background: #fff; border-radius: 12px; padding: 16px; border: 1px solid var(--border); margin-bottom: 16px; max-width: 800px; margin-inline: auto; width: 100%; }
 #view-editor { padding: 0; display: none; flex-direction: column; height: 100vh; overflow: hidden; background: var(--canvas-bg); position: relative; }
 #view-editor.active { display: flex; }
-.editor-top-bar { display: flex; justify-content: space-between; align-items: center; background: var(--toolbar-bg); padding: 8px 12px; border-bottom: 1px solid var(--border); z-index: 100; }
-.editor-top-actions { display: flex; gap: 6px; align-items: center; }
-.autosave-indicator { font-size: .7rem; color: var(--success); font-weight: 700; opacity: 0; transition: opacity .3s; position: absolute; top: 45px; left: 12px; background: rgba(255,255,255,.9); padding: 4px 8px; border-radius: 4px; z-index: 100; }
+.editor-top-bar { display: flex; justify-content: space-between; align-items: center; background: var(--toolbar-bg); padding: 10px 14px; border-bottom: 1px solid var(--border); z-index: 100; min-height: 60px; }
+.editor-top-actions { display: flex; gap: 8px; align-items: center; }
+.editor-top-actions button, .editor-top-bar .btn-icon { padding: 10px 14px; font-size: 1.1rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.autosave-indicator { font-size: .75rem; color: var(--success); font-weight: 700; opacity: 0; transition: opacity .3s; position: absolute; top: 65px; left: 12px; background: rgba(255,255,255,.95); padding: 6px 10px; border-radius: 6px; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 .autosave-indicator.show { opacity: 1; }
-.canvas-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; overflow: hidden; padding: 20px; position: relative; }
-.canvas { width: 360px; height: 640px; background-color: #fff; position: relative; box-shadow: 0 10px 25px 5px rgba(0,0,0,.2); overflow: hidden; transform-origin: center center; transition: transform 1s ease-out; }
-.canvas-object { position: absolute; user-select: none; padding: 4px; border: 1px dashed transparent; touch-action: none; will-change: transform, left, top; }
+.canvas-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; overflow: auto; padding: 20px; position: relative; touch-action: pan-x pan-y; }
+.canvas { width: 360px; height: 640px; background-color: #fff; position: relative; box-shadow: 0 10px 25px 5px rgba(0,0,0,.2); overflow: hidden; transform-origin: center center; transition: transform 0.2s ease-out; flex-shrink: 0; }
+.canvas-object { position: absolute; user-select: none; padding: 6px; border: 1px dashed transparent; touch-action: none; will-change: transform, left, top; }
 .canvas-object.selected { outline: 2px solid var(--primary); border: 1px dashed rgba(255,255,255,.8); }
 .canvas-object.multi-selected { outline: 2px solid #06b6d4; border: 1px dashed rgba(6,182,212,.8); }
 .canvas-object.locked { outline: 2px solid #ef4444; }
-.resize-handle { position: absolute; width: 10px; height: 10px; background: #fff; border: 2px solid var(--primary); border-radius: 50%; z-index: 1000; display: none; }
+.resize-handle { position: absolute; width: 14px; height: 14px; background: #fff; border: 2px solid var(--primary); border-radius: 50%; z-index: 1000; display: none; }
 .canvas-object.selected .resize-handle { display: block; }
-.handle-tl { top: -6px; left: -6px; cursor: nwse-resize; }
-.handle-t { top: -6px; left: calc(50% - 5px); cursor: ns-resize; }
-.handle-tr { top: -6px; right: -6px; cursor: nesw-resize; }
-.handle-l { top: calc(50% - 5px); left: -6px; cursor: ew-resize; }
-.handle-r { top: calc(50% - 5px); right: -6px; cursor: ew-resize; }
-.handle-bl { bottom: -6px; left: -6px; cursor: nesw-resize; }
-.handle-b { bottom: -6px; left: calc(50% - 5px); cursor: ns-resize; }
-.handle-br { bottom: -6px; right: -6px; cursor: nwse-resize; }
-.rotate-handle { position: absolute; top: -30px; left: calc(50% - 8px); width: 16px; height: 16px; background: #8b5cf6; border: 2px solid #fff; border-radius: 50%; z-index: 1001; cursor: grab; display: none; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
+.handle-tl { top: -7px; left: -7px; cursor: nwse-resize; }
+.handle-t { top: -7px; left: calc(50% - 7px); cursor: ns-resize; }
+.handle-tr { top: -7px; right: -7px; cursor: nesw-resize; }
+.handle-l { top: calc(50% - 7px); left: -7px; cursor: ew-resize; }
+.handle-r { top: calc(50% - 7px); right: -7px; cursor: ew-resize; }
+.handle-bl { bottom: -7px; left: -7px; cursor: nesw-resize; }
+.handle-b { bottom: -7px; left: calc(50% - 7px); cursor: ns-resize; }
+.handle-br { bottom: -7px; right: -7px; cursor: nwse-resize; }
+.rotate-handle { position: absolute; top: -35px; left: calc(50% - 10px); width: 20px; height: 20px; background: #8b5cf6; border: 2px solid #fff; border-radius: 50%; z-index: 1001; cursor: grab; display: none; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
 .canvas-object.selected .rotate-handle, .canvas-object.selected .rotate-line { display: block; }
-.rotate-line { position: absolute; top: -14px; left: calc(50% - 1px); width: 2px; height: 14px; background: #8b5cf6; display: none; }
+.rotate-line { position: absolute; top: -15px; left: calc(50% - 1px); width: 2px; height: 15px; background: #8b5cf6; display: none; }
 .guide-line { position: absolute; background: #ef4444; z-index: 9999; display: none; pointer-events: none; box-shadow: 0 0 4px rgba(239,68,68,.5); }
 .guide-v { width: 1px; height: 100%; top: 0; left: 180px; }
 .guide-h { width: 100%; height: 1px; left: 0; top: 320px; }
-.floating-action-bar { position: absolute; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,.15); display: flex; gap: 4px; padding: 4px; z-index: 1500; border: 1px solid var(--border); transform: translateX(-50%); display: none; }
-.floating-action-bar button { padding: 6px 8px; font-size: .85rem; background: 0 0; color: var(--text-main); border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-.editor-bottom-bar { display: flex; justify-content: space-around; background: var(--toolbar-bg); padding: 8px; border-top: 1px solid var(--border); z-index: 100; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
-.bottom-tool { display: flex; flex-direction: column; align-items: center; font-size: .7rem; color: var(--text-muted); background: 0 0; padding: 4px; border: none; cursor: pointer; }
-.bottom-tool.icon { font-size: 1.2rem; margin-bottom: 2px; }
-.bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: #fff; border-radius: 16px 16px 0 0; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,.1); transition: bottom .3s cubic-bezier(.4,0,.2,1); z-index: 2000; max-height: 80vh; overflow-y: auto; }
+.floating-action-bar { position: absolute; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,.2); display: flex; gap: 6px; padding: 6px; z-index: 1500; border: 1px solid var(--border); transform: translateX(-50%); display: none; }
+.floating-action-bar button { padding: 8px 10px; font-size: 0.95rem; background: 0 0; color: var(--text-main); border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+.editor-bottom-bar { display: flex; justify-content: space-around; background: var(--toolbar-bg); padding: 12px 8px; border-top: 1px solid var(--border); z-index: 100; padding-bottom: max(14px, env(safe-area-inset-bottom)); box-shadow: 0 -4px 10px rgba(0,0,0,.03); }
+.bottom-tool { display: flex; flex-direction: column; align-items: center; font-size: .8rem; font-weight: 600; color: var(--text-main); background: 0 0; padding: 6px 12px; border: none; cursor: pointer; gap: 4px; }
+.bottom-tool .icon { font-size: 1.6rem; }
+.bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: #fff; border-radius: 20px 20px 0 0; padding: 20px; box-shadow: 0 -4px 25px rgba(0,0,0,.15); transition: bottom .3s cubic-bezier(.4,0,.2,1); z-index: 2000; max-height: 80vh; overflow-y: auto; }
 .bottom-sheet.active { bottom: 0; }
-.sheet-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 16px; }
-.sheet-close { font-size: 1.5rem; background: 0 0; color: var(--text-main); padding: 0; cursor: pointer; }
-.input-group { margin-bottom: 12px; }
-.input-group label { display: block; font-size: .75rem; font-weight: 600; margin-bottom: 4px; color: var(--text-muted); }
-.input-group input, .input-group select, .input-group textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: .9rem; }
-.asset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-height: 220px; overflow-y: auto; padding-right: 5px; }
-.asset-item { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; }
-.asset-item img { width: 100%; height: 50px; object-fit: contain; }
+.sheet-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px; }
+.sheet-close { font-size: 1.6rem; background: 0 0; color: var(--text-main); padding: 4px 10px; cursor: pointer; }
+.input-group { margin-bottom: 14px; }
+.input-group label { display: block; font-size: .8rem; font-weight: 700; margin-bottom: 6px; color: var(--text-muted); }
+.input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; }
+.asset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-height: 240px; overflow-y: auto; padding-right: 5px; }
+.asset-item { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; cursor: pointer; }
+.asset-item img { width: 100%; height: 55px; object-fit: contain; }
 #publicViewerOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 3000; overflow-y: auto; align-items: flex-start; justify-content: center; transition: .3s; }
 .public-card { width: 100%; max-width: 480px; background: #fff; min-height: 100vh; position: relative; overflow: hidden; margin: 0 auto; box-shadow: 0 0 20px rgba(0,0,0,.5); }
-.preview-header { position: sticky; top: 0; left: 0; width: 100%; background: #1e293b; padding: 10px 16px; display: flex; justify-content: center; gap: 8px; z-index: 3100; border-bottom: 1px solid #334155; }
-.preview-header button { background: #334155; color: #fff; padding: 8px 12px; border-radius: 20px; font-size: .75rem; }
+.preview-header { position: sticky; top: 0; left: 0; width: 100%; background: #1e293b; padding: 12px 16px; display: flex; justify-content: center; gap: 8px; z-index: 3100; border-bottom: 1px solid #334155; }
+.preview-header button { background: #334155; color: #fff; padding: 10px 14px; border-radius: 20px; font-size: .85rem; }
 .preview-header button.active { background: var(--primary); }
 .preview-header button.close-btn { background: #ef4444; margin-left: auto; }
-.admin-table { width: 100%; border-collapse: collapse; font-size: .75rem; }
-.admin-table td, .admin-table th { border: 1px solid var(--border); padding: 8px; text-align: left; }
+.admin-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+.admin-table td, .admin-table th { border: 1px solid var(--border); padding: 10px; text-align: left; }
 @keyframes anim-fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes anim-slideUp { from { transform: translateY(80px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes anim-slideDown { from { transform: translateY(-80px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -88,8 +89,8 @@ button:disabled { opacity: .7; cursor: not-allowed; }
 .cd-box { display: flex; flex-direction: column; background: rgba(255,255,255,.85); border-radius: 8px; padding: 8px; min-width: 50px; box-shadow: 0 2px 5px rgba(0,0,0,.1); }
 .cd-num { font-size: 1.2rem; line-height: 1; margin-bottom: 2px; }
 .cd-label { font-size: .5rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b; }
-#errorBanner { display: none; background: #ef4444; color: #fff; padding: 10px; text-align: center; font-weight: 700; font-size: .8rem; z-index: 9999; width: 100%; }
-.music-btn { position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,.3); z-index: 3100; cursor: pointer; border: none; animation: spin 4s linear infinite; }
+#errorBanner { display: none; background: #ef4444; color: #fff; padding: 12px; text-align: center; font-weight: 700; font-size: .9rem; z-index: 9999; width: 100%; }
+.music-btn { position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; background: var(--primary); color: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 26px; box-shadow: 0 4px 10px rgba(0,0,0,.3); z-index: 3100; cursor: pointer; border: none; animation: spin 4s linear infinite; }
 .music-btn.paused { animation: none; opacity: .7; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 </style>
@@ -104,14 +105,19 @@ window.onerror = function (msg, url, line) {
         eb.innerHTML += "<br/>Error JS: " + msg + " (Baris: " + line + ")"; 
     }
 };
+// Proteksi anti tak sengaja ke-refresh / tertutup saat sedang ngedit
+window.addEventListener('beforeunload', function (e) {
+    e.preventDefault();
+    e.returnValue = '';
+});
 </script>
 
 <div id="publicViewerOverlay" style="flex-direction: column; align-items: center;">
     <div id="previewDeviceHeader" class="preview-header" style="display:none; width: 100%;">
-        <button onclick="setDevicePreview('mobile')" id="btnPrevMobile" class="active">HP</button>
-        <button onclick="setDevicePreview('tablet')" id="btnPrevTablet">Tablet</button>
-        <button onclick="setDevicePreview('desktop')" id="btnPrevDesktop">Desktop</button>
-        <button onclick="closePreview()" class="close-btn">X Tutup</button>
+        <button onclick="setDevicePreview('mobile')" id="btnPrevMobile" class="active">📱 HP</button>
+        <button onclick="setDevicePreview('tablet')" id="btnPrevTablet">タブ Tablet</button>
+        <button onclick="setDevicePreview('desktop')" id="btnPrevDesktop">💻 Desktop</button>
+        <button onclick="closePreview()" class="close-btn">✕ Tutup</button>
     </div>
     <div class="public-card" id="publicCardContent">Memuat Undangan...</div>
     <audio id="publicAudioPlayer" loop preload="auto"></audio>
@@ -120,43 +126,49 @@ window.onerror = function (msg, url, line) {
 
 <div id="mainAppContainer" style="display: flex; flex-direction: column; flex: 1;">
     <div id="view-dashboard" class="view-section active">
-        <header style="border-radius: 12px; margin-bottom: 16px; max-width: 800px; margin-inline: auto; width: 100%;">
-            <h1>Design Editor <span style="font-size:0.6rem; background: var(--success); color: white; padding:2px 6px; border-radius: 4px; vertical-align: middle;">V1.29.0 UTUH</span></h1>
-            <span id="userBadge" style="font-size: 0.7rem; color: var(--primary); font-weight:bold;">Memuat ID...</span>
+        <header style="border-radius: 12px; margin-bottom: 16px; max-width: 800px; margin-inline: auto; width: 100%; padding: 10px 0;">
+            <h1>Design Editor <span style="font-size:0.6rem; background: var(--success); color: white; padding:3px 8px; border-radius: 4px; vertical-align: middle;">V1.30.0 MOBILE</span></h1>
+            <span id="userBadge" style="font-size: 0.75rem; color: var(--primary); font-weight:bold;">Memuat ID...</span>
         </header>
         <div class="dashboard-grid">
-            <div class="card-menu" onclick="switchView('view-templates-catalog'); loadTemplatesCatalog();"><span class="icon">📄</span><span class="title">Buat Desain</span></div>
-            <div class="card-menu" onclick="switchView('view-projects'); loadUserProjects();"><span class="icon">📁</span><span class="title">Project Saya</span></div>
-            <div class="card-menu" onclick="openSheet('sheet-assets')"><span class="icon">🖼️</span><span class="title">Assets & Bingkai</span></div>
-            <div class="card-menu" onclick="switchView('view-admin'); loadAdminData();"><span class="icon">👥</span><span class="title">RSVP Tamu</span></div>
+            <div class="card-menu" onclick="switchView('view-templates-catalog'); loadTemplatesCatalog();"><span class="icon">📄</span><span class="title" style="font-weight:600;">Buat Desain</span></div>
+            <div class="card-menu" onclick="switchView('view-projects'); loadUserProjects();"><span class="icon">📁</span><span class="title" style="font-weight:600;">Project Saya</span></div>
+            <div class="card-menu" onclick="openSheet('sheet-assets')"><span class="icon">🖼️</span><span class="title" style="font-weight:600;">Assets & Bingkai</span></div>
+            <div class="card-menu" onclick="switchView('view-admin'); loadAdminData();"><span class="icon">👥</span><span class="title" style="font-weight:600;">RSVP Tamu</span></div>
         </div>
         <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items:center; margin-bottom:10px;">
-                <h2 style="margin:0; font-size:1rem;">Status Sistem</h2>
-                <span id="systemStatusBadge" style="font-size:0.7rem; font-weight: bold; color:#f59e0b;">CHECKING...</span>
+            <div style="display: flex; justify-content: space-between; align-items:center; margin-bottom:12px;">
+                <h2 style="margin:0; font-size:1.05rem;">Status Sistem</h2>
+                <span id="systemStatusBadge" style="font-size:0.75rem; font-weight: bold; color:#f59e0b;">CHECKING...</span>
             </div>
-            <button id="initBtn" onclick="jalankanInisialisasi()" disabled>Menunggu Booting...</button>
+            <button id="initBtn" onclick="jalankanInisialisasi()" disabled style="width:100%; padding: 12px;">Menunggu Booting...</button>
         </div>
     </div>
+    
     <div id="view-templates-catalog" class="view-section" style="max-width: 800px; margin: 0 auto; width: 100%;">
-        <button class="btn-outline" onclick="switchView('view-dashboard')" style="margin-bottom: 16px; width: fit-content;">&lt; Kembali</button>
+        <button class="btn-outline" onclick="switchView('view-dashboard')" style="margin-bottom: 16px; width: fit-content; padding: 10px 16px;">&lt; Kembali</button>
         <div class="card">
             <h2>Pilih Template Desain</h2>
             <div id="templatesCatalogContainer" style="display:grid; grid-template-columns: 1fr; gap:12px; margin-top: 12px;">Memuat katalog...</div>
         </div>
     </div>
+    
     <div id="view-editor" class="view-section">
         <div class="editor-top-bar">
-            <button class="btn-icon" onclick="exitEditor()">🔙</button>
+            <button class="btn-icon" onclick="exitEditor()" title="Keluar">🔙</button>
             <div class="editor-top-actions">
+                <button class="btn-icon" onclick="changeZoom(-0.15)" title="Perkecil Kanvas">🔍➖</button>
+                <span id="zoomLevelIndicator" style="font-size:0.8rem; font-weight:bold; min-width:40px; text-align:center;">100%</span>
+                <button class="btn-icon" onclick="changeZoom(0.15)" title="Perbesar Kanvas">🔍➕</button>
                 <button class="btn-icon" onclick="undo()" id="btnUndo" title="Undo" style="opacity:0.5;">↩️</button>
                 <button class="btn-icon" onclick="redo()" id="btnRedo" title="Redo" style="opacity:0.5;">↪️</button>
                 <button class="btn-icon" onclick="exportToPNG()" id="btnExport" title="Unduh PNG" style="color: #8b5cf6;">💾</button>
                 <button class="btn-icon" onclick="showPreview()" style="color: var(--primary);" title="Preview Responsif">👁️</button>
-                <button onclick="saveCurrentProject()" style="background: var(--success); padding: 8px 12px; font-size: 0.8rem;">Save</button>
+                <button onclick="saveCurrentProject()" style="background: var(--success); padding: 10px 16px; font-size: 0.9rem; font-weight: bold;">💾 Save</button>
             </div>
         </div>
-        <div id="autoSaveText" class="autosave-indicator">Draf Tersimpan</div>
+        <div id="autoSaveText" class="autosave-indicator">✨ Draf Tersimpan Otomatis</div>
+        
         <div class="canvas-wrapper" id="canvasWrapper" onclick="clearSelection(event)">
             <div class="canvas" id="mainCanvas">
                 <div id="guideV" class="guide-line guide-v"></div>
@@ -166,13 +178,14 @@ window.onerror = function (msg, url, line) {
                 <button onclick="openPropertySheet()" title="Edit Sifat">✏️ Edit</button>
                 <button onclick="toggleLockSelected()" id="btnFabLock">🔒</button>
                 <button onclick="toggleHideSelected()" id="btnFabHide">👁️</button>
-                <button onclick="groupSelected()" title="Group Objects">🗂️ Group</button>
-                <button onclick="changeLayer(1)" title="Naikkan Layer">🔼</button>
-                <button onclick="changeLayer(-1)" title="Turunkan Layer">🔽</button>
+                <button onclick="groupSelected()" title="Group">🗂️ Group</button>
+                <button onclick="changeLayer(1)" title="Naik">🔼</button>
+                <button onclick="changeLayer(-1)" title="Turun">🔽</button>
                 <button onclick="duplicateSelected()" title="Duplikat">📑</button>
                 <button onclick="deleteSelected()" title="Hapus" style="color:red;">🗑️</button>
             </div>
         </div>
+        
         <div class="editor-bottom-bar">
             <button class="bottom-tool" onclick="openSheet('sheet-add')"><span class="icon">➕</span>Tambah</button>
             <button class="bottom-tool" onclick="openSheet('sheet-assets')"><span class="icon">🧩</span>Assets</button>
@@ -183,35 +196,35 @@ window.onerror = function (msg, url, line) {
         
         <!-- Bottom Sheets -->
         <div id="sheet-add" class="bottom-sheet">
-            <div class="sheet-header"><h3>Tambah Objek</h3><button class="sheet-close" onclick="closeSheets()">x</button></div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <button class="btn-outline" onclick="addObject('text'); closeSheets();">Teks</button>
-                <button class="btn-outline" onclick="addObject('image'); closeSheets();">Gambar / URL</button>
-                <button class="btn-outline" onclick="addObject('button'); closeSheets();">Tombol Link</button>
-                <button class="btn-outline" onclick="addObject('countdown'); closeSheets();">Countdown</button>
-                <button class="btn-outline" onclick="addObject('shape'); closeSheets();">Kotak Latar</button>
-                <button class="btn-outline" onclick="addObject('video'); closeSheets();">Video MP4</button>
-                <button class="btn-outline" onclick="addObject('map'); closeSheets();">Google Map</button>
-                <button class="btn-outline" onclick="addObject('qr'); closeSheets();">QR Code</button>
-                <button class="btn-outline" onclick="addObject('gift'); closeSheets();">Angpao / Gift</button>
-                <button class="btn-outline" onclick="addObject('gallery'); closeSheets();">Galeri Foto</button>
+            <div class="sheet-header"><h3>Tambah Objek</h3><button class="sheet-close" onclick="closeSheets()">✕</button></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                <button class="btn-outline" onclick="addObject('text'); closeSheets();" style="padding:14px;">Teks</button>
+                <button class="btn-outline" onclick="addObject('image'); closeSheets();" style="padding:14px;">Gambar / URL</button>
+                <button class="btn-outline" onclick="addObject('button'); closeSheets();" style="padding:14px;">Tombol Link</button>
+                <button class="btn-outline" onclick="addObject('countdown'); closeSheets();" style="padding:14px;">Countdown</button>
+                <button class="btn-outline" onclick="addObject('shape'); closeSheets();" style="padding:14px;">Kotak Latar</button>
+                <button class="btn-outline" onclick="addObject('video'); closeSheets();" style="padding:14px;">Video MP4</button>
+                <button class="btn-outline" onclick="addObject('map'); closeSheets();" style="padding:14px;">Google Map</button>
+                <button class="btn-outline" onclick="addObject('qr'); closeSheets();" style="padding:14px;">QR Code</button>
+                <button class="btn-outline" onclick="addObject('gift'); closeSheets();" style="padding:14px;">Angpao / Gift</button>
+                <button class="btn-outline" onclick="addObject('gallery'); closeSheets();" style="padding:14px;">Galeri Foto</button>
             </div>
         </div>
         
         <div id="sheet-assets" class="bottom-sheet">
-            <div class="sheet-header"><h3>Pustaka Stiker & Bingkai</h3><button class="sheet-close" onclick="closeSheets()">x</button></div>
+            <div class="sheet-header"><h3>Pustaka Stiker & Bingkai</h3><button class="sheet-close" onclick="closeSheets()">✕</button></div>
             <div class="asset-grid">
-                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/833/833472.png', 'image')"><img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/833/833472.png" alt="Love"><br><span style="font-size:0.6rem;">Love</span></div>
-                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/711/711293.png', 'image')"><img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/711/711293.png" alt="Rings"><br><span style="font-size:0.6rem;">Cincin</span></div>
-                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/3069/3069186.png', 'image')"><img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/3069/3069186.png" alt="Border"><br><span style="font-size:0.6rem;">Bingkai Klasik</span></div>
-                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/1076/1076928.png', 'image')"><img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/1076/1076928.png" alt="Frame"><br><span style="font-size:0.6rem;">Bingkai Emas</span></div>
-                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/2924/2924082.png', 'image')"><img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/2924/2924082.png" alt="Corner"><br><span style="font-size:0.6rem;">Hiasan Sudut</span></div>
-                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/2769/2769213.png', 'image')"><img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/2769/2769213.png" alt="Sparkle"><br><span style="font-size:0.6rem;">Sparkle</span></div>
+                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/833/833472.png', 'image')"><img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/833/833472.png" alt="Love"><br><span style="font-size:0.65rem; font-weight:bold;">Love</span></div>
+                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/711/711293.png', 'image')"><img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/711/711293.png" alt="Rings"><br><span style="font-size:0.65rem; font-weight:bold;">Cincin</span></div>
+                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/3069/3069186.png', 'image')"><img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/3069/3069186.png" alt="Border"><br><span style="font-size:0.65rem; font-weight:bold;">Bingkai Klasik</span></div>
+                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/1076/1076928.png', 'image')"><img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/1076/1076928.png" alt="Frame"><br><span style="font-size:0.65rem; font-weight:bold;">Bingkai Emas</span></div>
+                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/2924/2924082.png', 'image')"><img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/2924/2924082.png" alt="Corner"><br><span style="font-size:0.65rem; font-weight:bold;">Hiasan Sudut</span></div>
+                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/2769/2769213.png', 'image')"><img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/2769/2769213.png" alt="Sparkle"><br><span style="font-size:0.65rem; font-weight:bold;">Sparkle</span></div>
             </div>
         </div>
         
         <div id="sheet-data" class="bottom-sheet">
-            <div class="sheet-header"><h3>Data Pengantin</h3><button class="sheet-close" onclick="closeSheets()">x</button></div>
+            <div class="sheet-header"><h3>Data Pengantin</h3><button class="sheet-close" onclick="closeSheets()">✕</button></div>
             <div class="input-group"><label>Nama Pria</label><input type="text" id="invGroom" oninput="updateInvitationData('groomName', this.value)"></div>
             <div class="input-group"><label>Nama Wanita</label><input type="text" id="invBride" oninput="updateInvitationData('brideName', this.value)"></div>
             <div class="input-group"><label>Tanggal Acara</label><input type="datetime-local" id="invDate" oninput="updateInvitationData('eventDate', this.value)"></div>
@@ -219,7 +232,7 @@ window.onerror = function (msg, url, line) {
         </div>
         
         <div id="sheet-bg" class="bottom-sheet">
-            <div class="sheet-header"><h3>Background Builder</h3><button class="sheet-close" onclick="closeSheets()">x</button></div>
+            <div class="sheet-header"><h3>Background Builder</h3><button class="sheet-close" onclick="closeSheets()">✕</button></div>
             <div class="input-group"><label>Warna Solid Utama</label><input type="color" id="bgColPicker" oninput="updateBackground('color', this.value)" style="height: 45px;"></div>
             <div style="display: flex; gap:10px;">
                 <div class="input-group" style="flex:1;"><label>Gradient 1</label><input type="color" id="bgGrad1" oninput="updateBackgroundGradient()" style="height: 45px;" value="#ffffff"></div>
@@ -229,7 +242,7 @@ window.onerror = function (msg, url, line) {
         </div>
         
         <div id="sheet-property" class="bottom-sheet">
-            <div class="sheet-header"><h3>Edit Sifat Objek</h3><button class="sheet-close" onclick="closeSheets()">x</button></div>
+            <div class="sheet-header"><h3>Edit Sifat Objek</h3><button class="sheet-close" onclick="closeSheets()">✕</button></div>
             <div id="propTextContainer" class="input-group"><label>Isi Teks / Info</label><input type="text" id="propText" oninput="updateSelectedObjectProp('content', this.value)"></div>
             <div id="propLinkContainer" class="input-group" style="display:none;"><label>URL / Link (Koma untuk Galeri)</label><input type="text" id="propLink" oninput="updateSelectedObjectProp('url', this.value)"></div>
             <div id="propImgContainer" class="input-group" style="display:none;"><label>URL Media Baru</label><input type="text" id="propImage" oninput="updateSelectedObjectProp('url', this.value)"></div>
@@ -252,7 +265,7 @@ window.onerror = function (msg, url, line) {
                 <div class="input-group" style="flex:1;"><label>Rotasi (°)</label><input type="number" id="propRotation" oninput="updateSelectedObjectProp('rotation', parseInt(this.value))"></div>
             </div>
             <div class="input-group" style="display: flex; gap:10px; align-items: center;">
-                <label style="display: flex; align-items: center; gap:6px; cursor:pointer;"><input type="checkbox" id="propLockRatio" onchange="toggleLockRatio(this.checked)"> Kunci Rasio (Lock Ratio)</label>
+                <label style="display: flex; align-items: center; gap:8px; cursor:pointer;"><input type="checkbox" id="propLockRatio" onchange="toggleLockRatio(this.checked)" style="width:20px; height:20px;"> Kunci Rasio (Lock Ratio)</label>
             </div>
             <div class="input-group" style="display: flex; gap:10px;">
                 <div id="propFontContainer" style="flex:1;"><label>Jenis Font</label>
@@ -268,14 +281,16 @@ window.onerror = function (msg, url, line) {
             </div>
         </div>
     </div>
+    
     <div id="view-projects" class="view-section" style="max-width: 800px; margin: 0 auto; width: 100%;">
-        <button class="btn-outline" onclick="switchView('view-dashboard')" style="margin-bottom: 16px; width: fit-content;">&lt; Dashboard</button>
+        <button class="btn-outline" onclick="switchView('view-dashboard')" style="margin-bottom: 16px; width: fit-content; padding: 10px 16px;">&lt; Dashboard</button>
         <div class="card"><h2>Project Disimpan</h2><div id="projectListContainer">Memuat...</div></div>
     </div>
+    
     <div id="view-admin" class="view-section" style="max-width: 800px; margin: 0 auto; width: 100%;">
-        <button class="btn-outline" onclick="switchView('view-dashboard')" style="margin-bottom: 16px; width: fit-content;">&lt; Dashboard</button>
+        <button class="btn-outline" onclick="switchView('view-dashboard')" style="margin-bottom: 16px; width: fit-content; padding: 10px 16px;">&lt; Dashboard</button>
         <div class="card">
-            <h2>Buku Tamu</h2><button onclick="loadAdminData()" style="margin-bottom: 10px;">Muat Ulang</button>
+            <h2>Buku Tamu</h2><button onclick="loadAdminData()" style="margin-bottom: 12px; padding: 10px 16px;">Muat Ulang</button>
             <div style="overflow-x: auto;"><table class="admin-table"><thead><tr><th>ID</th><th>Nama</th><th>Hadir</th><th>Jml</th><th>Pesan</th></tr></thead><tbody id="adminRsvpTableBody"></tbody></table></div>
         </div>
     </div>
@@ -285,13 +300,14 @@ window.onerror = function (msg, url, line) {
 const urlParams = new URLSearchParams(window.location.search);
 const serverPublishId = urlParams.get('id') || "";
 let currentUserId = "USER_" + Math.random().toString(36).substring(2, 9).toUpperCase();
-let currentProject = { projectID: "", version: "1.29.0", elements: [], invitation: {} };
+let currentProject = { projectID: "", version: "1.30.0", elements: [], invitation: {} };
 let selectedElementId = null;
 let multiSelectedIds = [];
 let historyStack = [];
 let historyStep = -1;
 let isSavingHistory = false;
 let autoSaveTimer = null;
+let customZoomMultiplier = 1; // Fitur zoom manual user (+ / -)
 
 const CANVAS_W = 360;
 const CANVAS_H = 640;
@@ -355,8 +371,19 @@ function resizeCanvasView() {
     const wrapper = document.getElementById('canvasWrapper');
     const canvas = document.getElementById('mainCanvas');
     if (!wrapper || !canvas || document.getElementById('view-editor').style.display === 'none') return;
-    const scale = Math.min(1, (wrapper.clientWidth - 40) / CANVAS_W, (wrapper.clientHeight - 40) / CANVAS_H);
-    canvas.style.transform = "scale(" + scale + ")";
+    const baseScale = Math.min(1, (wrapper.clientWidth - 40) / CANVAS_W, (wrapper.clientHeight - 40) / CANVAS_H);
+    const finalScale = baseScale * customZoomMultiplier;
+    canvas.style.transform = "scale(" + finalScale + ")";
+    
+    const indicator = document.getElementById('zoomLevelIndicator');
+    if (indicator) { indicator.innerText = Math.round(customZoomMultiplier * 100) + "%"; }
+}
+
+function changeZoom(delta) {
+    customZoomMultiplier += delta;
+    if (customZoomMultiplier < 0.4) customZoomMultiplier = 0.4;
+    if (customZoomMultiplier > 2.5) customZoomMultiplier = 2.5;
+    resizeCanvasView();
 }
 
 window.addEventListener('resize', resizeCanvasView);
@@ -368,7 +395,7 @@ function switchView(viewId) {
 }
 
 function exitEditor() { 
-    if (confirm("Keluar dari editor?")) { switchView('view-dashboard'); } 
+    if (confirm("Keluar dari editor? Pastikan perubahan sudah disimpan.")) { switchView('view-dashboard'); } 
 }
 
 function saveToHistory() {
@@ -405,7 +432,6 @@ function redo() {
 }
 
 function triggerAutoSave() {
-    if (!currentProject.projectID) return;
     clearTimeout(autoSaveTimer);
     autoSaveTimer = setTimeout(function() { 
         try {
@@ -434,7 +460,7 @@ function migrateData(project) {
         if (el.filter === undefined) el.filter = 'none'; 
         if (el.animation === undefined) el.animation = 'none';
     }); 
-    project.version = "1.29.0";
+    project.version = "1.30.0";
 }
 
 function openEditorWithTemplate(t) {
@@ -442,11 +468,12 @@ function openEditorWithTemplate(t) {
     currentProject = { 
         projectID: 'PROJ_' + Math.random().toString(36).substring(2, 8).toUpperCase(), 
         userId: currentUserId, 
-        version: "1.29.0", 
+        version: "1.30.0", 
         invitation: config.invitation || {}, 
         elements: config.elements || [] 
     };
     migrateData(currentProject); 
+    customZoomMultiplier = 1;
     startEditor();
 }
 
@@ -509,15 +536,17 @@ function renderCanvas() {
         canvas.style.backgroundColor = inv.bgColor || '#ffffff'; 
     }
     
-    const staticBase = document.createElement('div');
-    staticBase.style.position = 'absolute'; 
-    staticBase.style.width = '100%'; 
-    staticBase.style.height = '100%'; 
-    staticBase.style.zIndex = '0';
-    let dateStr = inv.eventDate ? new Date(inv.eventDate).toLocaleDateString('id-ID') : 'Tanggal Belum Diatur';
-    
-    staticBase.innerHTML = '<div style="padding-top: 50px; pointer-events: none; text-align:center;"><p style="font-size:0.75rem; color: #475569; letter-spacing:2px;">The Wedding of</p><h2 style="font-size:2rem; color:var(--primary); margin:10px 0; font-family:serif;">' + (inv.groomName || 'Pria') + ' & ' + (inv.brideName || 'Wanita') + '</h2><p style="font-size:0.85rem; font-weight: bold;">' + dateStr + '</p></div>';
-    canvas.appendChild(staticBase);
+    // Layout bersih/kosong kecuali ada teks/data pengantin yang diisi
+    if (inv.groomName || inv.brideName || inv.eventDate) {
+        const staticBase = document.createElement('div');
+        staticBase.style.position = 'absolute'; 
+        staticBase.style.width = '100%'; 
+        staticBase.style.height = '100%'; 
+        staticBase.style.zIndex = '0';
+        let dateStr = inv.eventDate ? new Date(inv.eventDate).toLocaleDateString('id-ID') : '';
+        staticBase.innerHTML = '<div style="padding-top: 50px; pointer-events: none; text-align:center;"><p style="font-size:0.75rem; color: #475569; letter-spacing:2px;">The Wedding of</p><h2 style="font-size:2rem; color:var(--primary); margin:10px 0; font-family:serif;">' + (inv.groomName || 'Pria') + ' & ' + (inv.brideName || 'Wanita') + '</h2><p style="font-size:0.85rem; font-weight: bold;">' + dateStr + '</p></div>';
+        canvas.appendChild(staticBase);
+    }
     
     let sortedElements = [...currentProject.elements].sort(function(a,b) { return (a.zIndex || 1) - (b.zIndex || 1); });
     sortedElements.forEach(function(el) {
@@ -584,9 +613,11 @@ function renderCanvas() {
 
 let startX = 0, startY = 0, isDragging = false, dragReqAnimationFrame = null;
 
-function getScaleOffset() { 
-    const w = document.getElementById('canvasWrapper'); 
-    return w ? Math.min(1, (w.clientWidth - 40) / CANVAS_W, (w.clientHeight - 40) / CANVAS_H) : 1; 
+function getTotalScale() {
+    const wrapper = document.getElementById('canvasWrapper');
+    if (!wrapper) return customZoomMultiplier;
+    const baseScale = Math.min(1, (wrapper.clientWidth - 40) / CANVAS_W, (wrapper.clientHeight - 40) / CANVAS_H);
+    return baseScale * customZoomMultiplier;
 }
 
 function clearSelection(e) { 
@@ -610,7 +641,7 @@ function startDrag(e, id) {
     
     renderCanvas(); 
     isDragging = true; 
-    const scale = getScaleOffset(); 
+    const scale = getTotalScale(); 
     const canvasRect = document.getElementById('mainCanvas').getBoundingClientRect(); 
     startX = (e.clientX - canvasRect.left) / scale - el.x; 
     startY = (e.clientY - canvasRect.top) / scale - el.y; 
@@ -621,7 +652,7 @@ function startDrag(e, id) {
 function onDrag(e) { 
     if (!isDragging) return; 
     const el = currentProject.elements.find(function(i) { return i.id === selectedElementId; }); 
-    const scale = getScaleOffset(); 
+    const scale = getTotalScale(); 
     const canvasRect = document.getElementById('mainCanvas').getBoundingClientRect(); 
     if (el) { 
         let newX = (e.clientX - canvasRect.left) / scale - startX; 
@@ -691,7 +722,7 @@ function onResize(e) {
     const el = currentProject.elements.find(function(i) { return i.id === resizingData.id; }); 
     const dx = e.clientX - resizingData.startX; 
     const dy = e.clientY - resizingData.startY; 
-    const scale = getScaleOffset();
+    const scale = getTotalScale();
     let w = resizingData.origWidth, h = resizingData.origHeight, x = resizingData.origX, y = resizingData.origY; 
     const handle = resizingData.handle; 
     
@@ -810,9 +841,9 @@ function updateFloatingActionBar() {
     const elData = currentProject.elements.find(function(i) { return i.id === selectedElementId; }); 
     const domEl = document.getElementById(selectedElementId); 
     if (domEl && elData) {
-        const scale = getScaleOffset(); 
+        const scale = getTotalScale(); 
         fab.style.display = 'flex';
-        fab.style.top = (elData.y * scale - 45) + 'px'; 
+        fab.style.top = (elData.y * scale - 50) + 'px'; 
         fab.style.left = (elData.x * scale + (domEl.offsetWidth * scale / 2)) + 'px';
         document.getElementById('btnFabLock').innerText = elData.locked ? '🔓' : '🔒'; 
         document.getElementById('btnFabHide').innerText = elData.visible === false ? '👁️' : '🕶️'; 
@@ -937,7 +968,7 @@ function loadTemplatesCatalog() {
             if (res && res.success) {
                 let html = '';
                 if (res.templates.length === 0) { 
-                    html = '<div class="card-menu" onclick="openEditorWithTemplate({templateID:\'DEF\', name: \'Kanvas Kosong\', configJSON:JSON.stringify({invitation: {groomName: \'Pria\', brideName:\'Wanita\', bgColor:\'#ffffff\'}, elements: []})})"><span class="icon">📄</span><span class="title">Kanvas Kosong</span></div>';
+                    html = '<div class="card-menu" onclick="openEditorWithTemplate({templateID:\'DEF\', name: \'Kanvas Kosong\', configJSON:JSON.stringify({invitation: {groomName: \'\', brideName:\'\', bgColor:\'#ffffff\'}, elements: []})})"><span class="icon">📄</span><span class="title">Kanvas Kosong (Bersih)</span></div>';
                 } else { 
                     res.templates.forEach(function(t) {
                         html += '<div class="card-menu" onclick=\'openEditorWithTemplate(' + JSON.stringify(t) + ')\'><span class="icon">✨</span><span class="title">' + t.name + '</span></div>'; 
@@ -945,7 +976,7 @@ function loadTemplatesCatalog() {
                 }
                 c.innerHTML = html;
             } else { 
-                c.innerHTML = '<button class="btn-outline" onclick="openEditorWithTemplate({templateID: \'DEF\', name: \'Kanvas Kosong\', configJSON:JSON.stringify({invitation: {groomName: \'Pria\', brideName:\'Wanita\', bgColor:\'#ffffff\'}, elements: []})})">Buka Editor Kosong</button>'; 
+                c.innerHTML = '<button class="btn-outline" onclick="openEditorWithTemplate({templateID: \'DEF\', name: \'Kanvas Kosong\', configJSON:JSON.stringify({invitation: {groomName: \'\', brideName:\'\', bgColor:\'#ffffff\'}, elements: []})})">Buka Editor Kosong</button>'; 
             }
         }).withFailureHandler(function(err) { c.innerHTML = "Gagal memuat: " + err.message; }).getTemplatesCatalog();
     } catch(e) { c.innerHTML = "Error: " + e.message; }
@@ -960,7 +991,7 @@ function loadUserProjects() {
                 res.projects.forEach(function(p) { 
                     let parsed = JSON.parse(p.dataJSON); 
                     let title = parsed.invitation.groomName ? (parsed.invitation.groomName + " & " + parsed.invitation.brideName) : p.projectID; 
-                    c.innerHTML += '<div style="display: flex; justify-content: space-between; padding:10px; border-bottom:1px solid #cbd5e1;"><span><strong>' + title + '</strong> (' + p.status + ')</span><button onclick=\'openExistingProject("' + encodeURIComponent(p.dataJSON) + '")\'>Edit</button></div>'; 
+                    c.innerHTML += '<div style="display: flex; justify-content: space-between; padding:12px; border-bottom:1px solid #cbd5e1; align-items:center;"><span><strong>' + title + '</strong> (' + p.status + ')</span><button onclick=\'openExistingProject("' + encodeURIComponent(p.dataJSON) + '")\' style="padding:8px 14px;">Edit</button></div>'; 
                 });
             } else { c.innerHTML = "<p>Belum ada project.</p>"; }
         }).getUserProjects(currentUserId);
@@ -969,7 +1000,10 @@ function loadUserProjects() {
 
 function openExistingProject(jsonStr) { 
     try { 
-        currentProject = JSON.parse(decodeURIComponent(jsonStr)); migrateData(currentProject); startEditor(); 
+        currentProject = JSON.parse(decodeURIComponent(jsonStr)); 
+        migrateData(currentProject); 
+        customZoomMultiplier = 1;
+        startEditor(); 
     } catch(e) { alert("Format data rusak."); } 
 }
 
@@ -997,21 +1031,21 @@ function saveCurrentProject() {
     btn.innerText = "Saving..."; btn.disabled=true;
     try {
         google.script.run.withSuccessHandler(function(res) { 
-            btn.innerText = "Save"; btn.disabled=false; 
-            if (res && res.success) { alert("Tersimpan!"); localStorage.removeItem('DE_LOCAL_DRAFT'); }
+            btn.innerText = "💾 Save"; btn.disabled=false; 
+            if (res && res.success) { alert("Berhasil Tersimpan ke Database!"); localStorage.removeItem('DE_LOCAL_DRAFT'); }
         }).saveProjectData({ projectID: currentProject.projectID, userId: currentUserId, dataJSON: JSON.stringify(currentProject) }); 
     } catch(e) {
-        btn.innerText = "Save"; btn.disabled = false;
-        alert("Penyimpanan offline berhasil.");
+        btn.innerText = "💾 Save"; btn.disabled = false;
+        alert("Penyimpanan offline lokal berhasil.");
     }
 }
 
 function publishCurrentProject() {
     if(!currentProject.projectID) { currentProject.projectID = 'PROJ_' + Math.random().toString(36).substring(2, 8).toUpperCase(); }
-    if(confirm("Publish project ini?")) {
+    if(confirm("Publish project ini agar bisa diakses publik?")) {
         try {
             google.script.run.withSuccessHandler(function(res) { 
-                if (res && res.success) { localStorage.removeItem('DE_LOCAL_DRAFT'); prompt("BERHASIL! Salin Link:", res.publicURL); window.open(res.publicURL, '_blank'); } 
+                if (res && res.success) { localStorage.removeItem('DE_LOCAL_DRAFT'); prompt("BERHASIL! Salin Link Publik:", res.publicURL); window.open(res.publicURL, '_blank'); } 
             }).publishProject({ projectID: currentProject.projectID, userId: currentUserId, dataJSON: JSON.stringify(currentProject) }); 
         } catch(e) { alert("Fitur publish memerlukan server online."); }
     }
@@ -1122,7 +1156,13 @@ function renderPublicContent() {
     });
     
     card.style.cssText = bgStyle;
-    card.innerHTML = '<div style="position:relative; width:100%; max-width:360px; height: 640px; overflow:hidden; margin:0 auto;">' + dynamicHTML + '<div class="eff-fadeIn" style="padding-top: 50px; position:relative; z-index:0; text-align:center; pointer-events: none;"><p style="font-size:0.75rem; color: #475569; letter-spacing: 2px;">The Wedding of</p><h2 style="font-size:2rem; color:var(--primary); margin: 10px 0; font-family: serif;">' + (inv.groomName ||'') + ' & ' + (inv.brideName || '') + '</h2><p style="font-size:0.9rem; font-weight: bold;">' + (inv.eventDate ? new Date(inv.eventDate).toLocaleDateString('id-ID') : '') + '</p></div></div><div style="background:#ffffff; z-index: 1000; position:relative; padding: 20px; padding-bottom:50px; margin-top: 20px; text-align:center;"><h4 style="margin-bottom:12px;">Konfirmasi Kehadiran (RSVP)</h4><div class="input-group"><input type="text" id="rsvpNamePublic" placeholder="Nama Anda" required> </div><div class="input-group"><select id="rsvpAttPublic"><option value="Hadir">Hadir</option><option value="Tidak Hadir">Berhalangan</option></select></div><div class="input-group"><textarea id="rsvpMsgPublic" rows="2" placeholder="Pesan / Doa"></textarea></div><button id="btnSubmitRSVP" onclick="submitRSVPForm()" style="width:100%; padding: 10px;">Kirim RSVP</button></div>';
+    
+    let headerHtml = "";
+    if (inv.groomName || inv.brideName || inv.eventDate) {
+        headerHtml = '<div class="eff-fadeIn" style="padding-top: 50px; position:relative; z-index:0; text-align:center; pointer-events: none;"><p style="font-size:0.75rem; color: #475569; letter-spacing: 2px;">The Wedding of</p><h2 style="font-size:2rem; color:var(--primary); margin: 10px 0; font-family: serif;">' + (inv.groomName ||'') + ' & ' + (inv.brideName || '') + '</h2><p style="font-size:0.9rem; font-weight: bold;">' + (inv.eventDate ? new Date(inv.eventDate).toLocaleDateString('id-ID') : '') + '</p></div>';
+    }
+    
+    card.innerHTML = '<div style="position:relative; width:100%; max-width:360px; height: 640px; overflow:hidden; margin:0 auto;">' + dynamicHTML + headerHtml + '</div><div style="background:#ffffff; z-index: 1000; position:relative; padding: 20px; padding-bottom:50px; margin-top: 20px; text-align:center;"><h4 style="margin-bottom:12px;">Konfirmasi Kehadiran (RSVP)</h4><div class="input-group"><input type="text" id="rsvpNamePublic" placeholder="Nama Anda" required> </div><div class="input-group"><select id="rsvpAttPublic"><option value="Hadir">Hadir</option><option value="Tidak Hadir">Berhalangan</option></select></div><div class="input-group"><textarea id="rsvpMsgPublic" rows="2" placeholder="Pesan / Doa"></textarea></div><button id="btnSubmitRSVP" onclick="submitRSVPForm()" style="width:100%; padding: 12px;">Kirim RSVP</button></div>';
     
     if (hasCountdown && inv.eventDate) {
         const targetDate = new Date(inv.eventDate).getTime();
@@ -1174,7 +1214,7 @@ function submitRSVPForm() {
         google.script.run.withSuccessHandler(function(res) {
             if (res && res.success) { 
                 btn.innerText = "✓ Berhasil Terkirim"; btn.style.backgroundColor = "#10b981";
-                document.getElementById('rsvpNamePublic').value = '';
+                document.getElementById('rsvpNamePublic' + '').value = '';
                 document.getElementById('rsvpMsgPublic').value = ''; 
             } else { alert("Gagal mengirim RSVP."); btn.innerText = "Kirim RSVP"; btn.disabled = false; }
         }).withFailureHandler(function(err) { 
