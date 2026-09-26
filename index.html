@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Design Editor V1.30.0 Mobile Pro</title>
+<title>Design Editor V1.31.0 Mobile Dynamic</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root { --primary: #4f46e5; --bg-color: #f1f5f9; --canvas-bg: #e2e8f0; --toolbar-bg: #ffffff; --text-main: #1e293b; --border: #cbd5e1; --success: #10b981; }
@@ -26,8 +26,8 @@ button:disabled { opacity: .7; cursor: not-allowed; }
 .editor-top-actions button, .editor-top-bar .btn-icon { padding: 10px 14px; font-size: 1.1rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
 .autosave-indicator { font-size: .75rem; color: var(--success); font-weight: 700; opacity: 0; transition: opacity .3s; position: absolute; top: 65px; left: 12px; background: rgba(255,255,255,.95); padding: 6px 10px; border-radius: 6px; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 .autosave-indicator.show { opacity: 1; }
-.canvas-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; overflow: auto; padding: 20px; position: relative; touch-action: pan-x pan-y; }
-.canvas { width: 360px; height: 640px; background-color: #fff; position: relative; box-shadow: 0 10px 25px 5px rgba(0,0,0,.2); overflow: hidden; transform-origin: center center; transition: transform 0.2s ease-out; flex-shrink: 0; }
+.canvas-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; overflow: auto; padding: 40px; position: relative; touch-action: pan-x pan-y; }
+.canvas { width: 360px; height: 640px; background-color: #fff; position: relative; box-shadow: 0 10px 25px 5px rgba(0,0,0,.2); overflow: hidden; transform-origin: center center; transition: transform 0.05s ease-out; flex-shrink: 0; }
 .canvas-object { position: absolute; user-select: none; padding: 6px; border: 1px dashed transparent; touch-action: none; will-change: transform, left, top; }
 .canvas-object.selected { outline: 2px solid var(--primary); border: 1px dashed rgba(255,255,255,.8); }
 .canvas-object.multi-selected { outline: 2px solid #06b6d4; border: 1px dashed rgba(6,182,212,.8); }
@@ -105,7 +105,6 @@ window.onerror = function (msg, url, line) {
         eb.innerHTML += "<br/>Error JS: " + msg + " (Baris: " + line + ")"; 
     }
 };
-// Proteksi anti tak sengaja ke-refresh / tertutup saat sedang ngedit
 window.addEventListener('beforeunload', function (e) {
     e.preventDefault();
     e.returnValue = '';
@@ -127,7 +126,7 @@ window.addEventListener('beforeunload', function (e) {
 <div id="mainAppContainer" style="display: flex; flex-direction: column; flex: 1;">
     <div id="view-dashboard" class="view-section active">
         <header style="border-radius: 12px; margin-bottom: 16px; max-width: 800px; margin-inline: auto; width: 100%; padding: 10px 0;">
-            <h1>Design Editor <span style="font-size:0.6rem; background: var(--success); color: white; padding:3px 8px; border-radius: 4px; vertical-align: middle;">V1.30.0 MOBILE</span></h1>
+            <h1>Design Editor <span style="font-size:0.6rem; background: var(--success); color: white; padding:3px 8px; border-radius: 4px; vertical-align: middle;">V1.31.0 DYNAMIC</span></h1>
             <span id="userBadge" style="font-size: 0.75rem; color: var(--primary); font-weight:bold;">Memuat ID...</span>
         </header>
         <div class="dashboard-grid">
@@ -300,14 +299,14 @@ window.addEventListener('beforeunload', function (e) {
 const urlParams = new URLSearchParams(window.location.search);
 const serverPublishId = urlParams.get('id') || "";
 let currentUserId = "USER_" + Math.random().toString(36).substring(2, 9).toUpperCase();
-let currentProject = { projectID: "", version: "1.30.0", elements: [], invitation: {} };
+let currentProject = { projectID: "", version: "1.31.0", elements: [], invitation: {} };
 let selectedElementId = null;
 let multiSelectedIds = [];
 let historyStack = [];
 let historyStep = -1;
 let isSavingHistory = false;
 let autoSaveTimer = null;
-let customZoomMultiplier = 1; // Fitur zoom manual user (+ / -)
+let customZoomMultiplier = 1;
 
 const CANVAS_W = 360;
 const CANVAS_H = 640;
@@ -340,6 +339,45 @@ function bootApplication() {
 
 document.addEventListener('DOMContentLoaded', bootApplication);
 window.onload = bootApplication;
+
+// ==========================================
+// FITUR PINCH-TO-ZOOM & GESTUR HP DINAMIS
+// ==========================================
+let initialPinchDistance = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const wrapper = document.getElementById('canvasWrapper');
+    if (!wrapper) return;
+
+    wrapper.addEventListener('touchstart', function(e) {
+        if (e.touches.length === 2) {
+            initialPinchDistance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+        }
+    }, { passive: true });
+
+    wrapper.addEventListener('touchmove', function(e) {
+        if (e.touches.length === 2 && initialPinchDistance !== null) {
+            const currentDistance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            const zoomFactor = currentDistance / initialPinchDistance;
+            customZoomMultiplier = Math.min(2.5, Math.max(0.4, customZoomMultiplier * (zoomFactor > 1 ? 1.03 : 0.97)));
+            initialPinchDistance = currentDistance;
+            resizeCanvasView();
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    wrapper.addEventListener('touchend', function(e) {
+        if (e.touches.length < 2) {
+            initialPinchDistance = null;
+        }
+    });
+});
 
 function jalankanInisialisasi() {
     const btn = document.getElementById('initBtn'); 
@@ -460,7 +498,7 @@ function migrateData(project) {
         if (el.filter === undefined) el.filter = 'none'; 
         if (el.animation === undefined) el.animation = 'none';
     }); 
-    project.version = "1.30.0";
+    project.version = "1.31.0";
 }
 
 function openEditorWithTemplate(t) {
@@ -468,7 +506,7 @@ function openEditorWithTemplate(t) {
     currentProject = { 
         projectID: 'PROJ_' + Math.random().toString(36).substring(2, 8).toUpperCase(), 
         userId: currentUserId, 
-        version: "1.30.0", 
+        version: "1.31.0", 
         invitation: config.invitation || {}, 
         elements: config.elements || [] 
     };
@@ -536,7 +574,6 @@ function renderCanvas() {
         canvas.style.backgroundColor = inv.bgColor || '#ffffff'; 
     }
     
-    // Layout bersih/kosong kecuali ada teks/data pengantin yang diisi
     if (inv.groomName || inv.brideName || inv.eventDate) {
         const staticBase = document.createElement('div');
         staticBase.style.position = 'absolute'; 
@@ -1040,7 +1077,7 @@ function saveCurrentProject() {
     }
 }
 
-function publishCurrentProject() {
+function publishProject() {
     if(!currentProject.projectID) { currentProject.projectID = 'PROJ_' + Math.random().toString(36).substring(2, 8).toUpperCase(); }
     if(confirm("Publish project ini agar bisa diakses publik?")) {
         try {
@@ -1214,7 +1251,7 @@ function submitRSVPForm() {
         google.script.run.withSuccessHandler(function(res) {
             if (res && res.success) { 
                 btn.innerText = "✓ Berhasil Terkirim"; btn.style.backgroundColor = "#10b981";
-                document.getElementById('rsvpNamePublic' + '').value = '';
+                document.getElementById('rsvpNamePublic').value = '';
                 document.getElementById('rsvpMsgPublic').value = ''; 
             } else { alert("Gagal mengirim RSVP."); btn.innerText = "Kirim RSVP"; btn.disabled = false; }
         }).withFailureHandler(function(err) { 
