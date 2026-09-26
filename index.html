@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Design Editor V1.33.0 Optimized Touch</title>
+<title>Design Editor V1.34.0 Single Finger Drag</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root { --primary: #4f46e5; --bg-color: #f1f5f9; --canvas-bg: #e2e8f0; --toolbar-bg: #ffffff; --text-main: #1e293b; --border: #cbd5e1; --success: #10b981; }
@@ -28,23 +28,23 @@ button:disabled { opacity: .7; cursor: not-allowed; }
 .autosave-indicator.show { opacity: 1; }
 .canvas-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; overflow: auto; padding: 40px; position: relative; }
 .canvas { width: 360px; height: 640px; background-color: #fff; position: relative; box-shadow: 0 10px 25px 5px rgba(0,0,0,.2); overflow: hidden; transform-origin: center center; transition: transform 0.1s ease-out; flex-shrink: 0; }
-.canvas-object { position: absolute; user-select: none; padding: 8px; border: 1px dashed transparent; touch-action: none; will-change: transform, left, top; cursor: pointer; }
+.canvas-object { position: absolute; user-select: none; padding: 8px; border: 1px dashed transparent; touch-action: none; -webkit-touch-callout: none; will-change: transform, left, top; cursor: pointer; }
 .canvas-object.selected { outline: 2px solid var(--primary); border: 1px dashed rgba(255,255,255,.8); background: rgba(79, 70, 229, 0.03); }
 .canvas-object.multi-selected { outline: 2px solid #06b6d4; border: 1px dashed rgba(6,182,212,.8); }
 .canvas-object.locked { outline: 2px solid #ef4444; }
-.resize-handle { position: absolute; width: 18px; height: 18px; background: #fff; border: 2px solid var(--primary); border-radius: 50%; z-index: 1000; display: none; }
+.resize-handle { position: absolute; width: 20px; height: 20px; background: #fff; border: 2px solid var(--primary); border-radius: 50%; z-index: 1000; display: none; touch-action: none; }
 .canvas-object.selected .resize-handle { display: block; }
-.handle-tl { top: -9px; left: -9px; cursor: nwse-resize; }
-.handle-t { top: -9px; left: calc(50% - 9px); cursor: ns-resize; }
-.handle-tr { top: -9px; right: -9px; cursor: nesw-resize; }
-.handle-l { top: calc(50% - 9px); left: -9px; cursor: ew-resize; }
-.handle-r { top: calc(50% - 9px); right: -9px; cursor: ew-resize; }
-.handle-bl { bottom: -9px; left: -9px; cursor: nesw-resize; }
-.handle-b { bottom: -9px; left: calc(50% - 9px); cursor: ns-resize; }
-.handle-br { bottom: -9px; right: -9px; cursor: nwse-resize; }
-.rotate-handle { position: absolute; top: -40px; left: calc(50% - 12px); width: 24px; height: 24px; background: #8b5cf6; border: 2px solid #fff; border-radius: 50%; z-index: 1001; cursor: grab; display: none; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
+.handle-tl { top: -10px; left: -10px; cursor: nwse-resize; }
+.handle-t { top: -10px; left: calc(50% - 10px); cursor: ns-resize; }
+.handle-tr { top: -10px; right: -10px; cursor: nesw-resize; }
+.handle-l { top: calc(50% - 10px); left: -10px; cursor: ew-resize; }
+.handle-r { top: calc(50% - 10px); right: -10px; cursor: ew-resize; }
+.handle-bl { bottom: -10px; left: -10px; cursor: nesw-resize; }
+.handle-b { bottom: -10px; left: calc(50% - 10px); cursor: ns-resize; }
+.handle-br { bottom: -10px; right: -10px; cursor: nwse-resize; }
+.rotate-handle { position: absolute; top: -45px; left: calc(50% - 12px); width: 24px; height: 24px; background: #8b5cf6; border: 2px solid #fff; border-radius: 50%; z-index: 1001; cursor: grab; display: none; box-shadow: 0 2px 4px rgba(0,0,0,.2); touch-action: none; }
 .canvas-object.selected .rotate-handle, .canvas-object.selected .rotate-line { display: block; }
-.rotate-line { position: absolute; top: -16px; left: calc(50% - 1px); width: 2px; height: 16px; background: #8b5cf6; display: none; }
+.rotate-line { position: absolute; top: -20px; left: calc(50% - 1px); width: 2px; height: 20px; background: #8b5cf6; display: none; }
 .guide-line { position: absolute; background: #ef4444; z-index: 9999; display: none; pointer-events: none; box-shadow: 0 0 4px rgba(239,68,68,.5); }
 .guide-v { width: 1px; height: 100%; top: 0; left: 180px; }
 .guide-h { width: 100%; height: 1px; left: 0; top: 320px; }
@@ -126,7 +126,7 @@ window.addEventListener('beforeunload', function (e) {
 <div id="mainAppContainer" style="display: flex; flex-direction: column; flex: 1;">
     <div id="view-dashboard" class="view-section active">
         <header style="border-radius: 12px; margin-bottom: 16px; max-width: 800px; margin-inline: auto; width: 100%; padding: 10px 0;">
-            <h1>Design Editor <span style="font-size:0.6rem; background: var(--success); color: white; padding:3px 8px; border-radius: 4px; vertical-align: middle;">V1.33.0 STABLE</span></h1>
+            <h1>Design Editor <span style="font-size:0.6rem; background: var(--success); color: white; padding:3px 8px; border-radius: 4px; vertical-align: middle;">V1.34.0 INSTANT DRAG</span></h1>
             <span id="userBadge" style="font-size: 0.75rem; color: var(--primary); font-weight:bold;">Memuat ID...</span>
         </header>
         <div class="dashboard-grid">
@@ -299,7 +299,7 @@ window.addEventListener('beforeunload', function (e) {
 const urlParams = new URLSearchParams(window.location.search);
 const serverPublishId = urlParams.get('id') || "";
 let currentUserId = "USER_" + Math.random().toString(36).substring(2, 9).toUpperCase();
-let currentProject = { projectID: "", version: "1.33.0", elements: [], invitation: {} };
+let currentProject = { projectID: "", version: "1.34.0", elements: [], invitation: {} };
 let selectedElementId = null;
 let multiSelectedIds = [];
 let historyStack = [];
@@ -459,7 +459,7 @@ function migrateData(project) {
         if (el.filter === undefined) el.filter = 'none'; 
         if (el.animation === undefined) el.animation = 'none';
     }); 
-    project.version = "1.33.0";
+    project.version = "1.34.0";
 }
 
 function openEditorWithTemplate(t) {
@@ -467,7 +467,7 @@ function openEditorWithTemplate(t) {
     currentProject = { 
         projectID: 'PROJ_' + Math.random().toString(36).substring(2, 8).toUpperCase(), 
         userId: currentUserId, 
-        version: "1.33.0", 
+        version: "1.34.0", 
         invitation: config.invitation || {}, 
         elements: config.elements || [] 
     };
@@ -611,13 +611,14 @@ function renderCanvas() {
             div.innerHTML += '<div class="rotate-line"></div><div class="rotate-handle" onpointerdown="startRotate(event, \'' + el.id + '\')" title="Putar"></div><div class="resize-handle handle-tl" onpointerdown="startResize(event, \'' + el.id + '\', \'tl\')"></div><div class="resize-handle handle-t" onpointerdown="startResize(event, \'' + el.id + '\', \'t\')"></div><div class="resize-handle handle-tr" onpointerdown="startResize(event, \'' + el.id + '\', \'tr\')"></div><div class="resize-handle handle-l" onpointerdown="startResize(event, \'' + el.id + '\', \'l\')"></div><div class="resize-handle handle-r" onpointerdown="startResize(event, \'' + el.id + '\', \'r\')"></div><div class="resize-handle handle-bl" onpointerdown="startResize(event, \'' + el.id + '\', \'bl\')"></div><div class="resize-handle handle-b" onpointerdown="startResize(event, \'' + el.id + '\', \'b\')"></div><div class="resize-handle handle-br" onpointerdown="startResize(event, \'' + el.id + '\', \'br\')"></div>';
         }
         
+        // Menggunakan pointerdown dengan pencegahan propagasi agar 1 jari langsung aktif menggeser objek
         div.onpointerdown = function(e) { startDrag(e, el.id); }; 
         canvas.appendChild(div);
     }); 
     updateFloatingActionBar();
 }
 
-let startX = 0, startY = 0, isDragging = false, dragReqAnimationFrame = null;
+let startX = 0, startY = 0, isDragging = false, activePointerId = null, dragReqAnimationFrame = null;
 
 function getTotalScale() {
     const wrapper = document.getElementById('canvasWrapper');
@@ -637,31 +638,27 @@ function startDrag(e, id) {
     const el = currentProject.elements.find(function(i) { return i.id === id; }); 
     if (!el || el.locked) { selectedElementId = id; renderCanvas(); return; }
     
-    // Support multi-touch / multi-select dengan Ctrl atau Shift
-    if (e.ctrlKey || e.shiftKey) { 
-        if (!multiSelectedIds.includes(id)) multiSelectedIds.push(id); 
-        selectedElementId = id;  
-    } else { 
-        if (!multiSelectedIds.includes(id)) multiSelectedIds = [id];
-        selectedElementId = id; 
-    } 
+    selectedElementId = id;
+    if (!multiSelectedIds.includes(id)) { multiSelectedIds = [id]; }
     
     renderCanvas(); 
     isDragging = true; 
-    
-    // Pointer capture agar sentuhan satu jari langsung terkunci dan sangat responsif
+    activePointerId = e.pointerId;
+
     try { e.target.setPointerCapture(e.pointerId); } catch(err) {}
 
     const scale = getTotalScale(); 
     const canvasRect = document.getElementById('mainCanvas').getBoundingClientRect(); 
     startX = (e.clientX - canvasRect.left) / scale - el.x; 
     startY = (e.clientY - canvasRect.top) / scale - el.y; 
+
     window.onpointermove = onDrag;
     window.onpointerup = stopDrag; 
+    window.onpointercancel = stopDrag;
 }
 
 function onDrag(e) { 
-    if (!isDragging) return; 
+    if (!isDragging || e.pointerId !== activePointerId) return; 
     const el = currentProject.elements.find(function(i) { return i.id === selectedElementId; }); 
     const scale = getTotalScale(); 
     const canvasRect = document.getElementById('mainCanvas').getBoundingClientRect(); 
@@ -709,28 +706,31 @@ function onDrag(e) {
 function stopDrag(e) { 
     if (isDragging) { 
         isDragging = false;
+        activePointerId = null;
         if (dragReqAnimationFrame) cancelAnimationFrame(dragReqAnimationFrame);
-        window.onpointermove = null; window.onpointerup = null;
+        window.onpointermove = null; window.onpointerup = null; window.onpointercancel = null;
         document.getElementById('guideV').style.display = 'none';
         document.getElementById('guideH').style.display = 'none';
         saveToHistory(); 
     } 
 }
 
-let resizingData = null;
+let resizingData = null, resizePointerId = null;
 
 function startResize(e, id, handleType) { 
     e.stopPropagation();
     const el = currentProject.elements.find(function(i) { return i.id === id; }); 
     if (!el || el.locked) return; 
+    resizePointerId = e.pointerId;
     try { e.target.setPointerCapture(e.pointerId); } catch(err) {}
     resizingData = { id: id, handle: handleType, startX: e.clientX, startY: e.clientY, origX: el.x, origY: el.y, origWidth: el.width, origHeight: el.height, origSize: el.size || 24, ratio: el.width / el.height }; 
     window.onpointermove = onResize;
     window.onpointerup = stopResize; 
+    window.onpointercancel = stopResize;
 }
 
 function onResize(e) { 
-    if (!resizingData) return; 
+    if (!resizingData || e.pointerId !== resizePointerId) return; 
     const el = currentProject.elements.find(function(i) { return i.id === resizingData.id; }); 
     const dx = e.clientX - resizingData.startX; 
     const dy = e.clientY - resizingData.startY; 
@@ -757,7 +757,7 @@ function onResize(e) {
 
 function stopResize() { 
     if (resizingData) { 
-        resizingData = null; window.onpointermove = null; window.onpointerup = null; saveToHistory(); 
+        resizingData = null; resizePointerId = null; window.onpointermove = null; window.onpointerup = null; window.onpointercancel = null; saveToHistory(); 
     } 
 }
 
@@ -766,22 +766,24 @@ function toggleLockRatio(val) {
     if (el) { el.lockRatio = val; saveToHistory(); }
 }
 
-let rotatingData = null;
+let rotatingData = null, rotatePointerId = null;
 
 function startRotate(e, id) { 
     e.stopPropagation(); 
     const el = currentProject.elements.find(function(i) { return i.id === id; }); 
     if (!el || el.locked) return; 
+    rotatePointerId = e.pointerId;
     try { e.target.setPointerCapture(e.pointerId); } catch(err) {}
     const domEl = document.getElementById(id);
     const rect = domEl.getBoundingClientRect(); 
     rotatingData = { id: id, centerX: rect.left + rect.width / 2, centerY: rect.top + rect.height / 2 }; 
     window.onpointermove = onRotate; 
     window.onpointerup = stopRotate;
+    window.onpointercancel = stopRotate;
 }
 
 function onRotate(e) { 
-    if (!rotatingData) return; 
+    if (!rotatingData || e.pointerId !== rotatePointerId) return; 
     const el = currentProject.elements.find(function(i) { return i.id === rotatingData.id; }); 
     let deg = Math.round(Math.atan2(e.clientY - rotatingData.centerY, e.clientX - rotatingData.centerX) * (180/Math.PI) + 90); 
     if (deg < 0) deg += 360; 
@@ -793,7 +795,7 @@ function onRotate(e) {
 }
 
 function stopRotate() { 
-    if (rotatingData) { rotatingData = null; window.onpointermove = null; window.onpointerup = null; saveToHistory(); } 
+    if (rotatingData) { rotatingData = null; rotatePointerId = null; window.onpointermove = null; window.onpointerup = null; window.onpointercancel = null; saveToHistory(); } 
 }
 
 function changeLayer(d) { 
@@ -981,7 +983,7 @@ function loadTemplatesCatalog() {
             if (res && res.success) {
                 let html = '';
                 if (res.templates.length === 0) { 
-                    html = '<div class="card-menu" onclick="openEditorWithTemplate({templateID:\'DEF\', name: \'Kanvas Kosong\', configJSON:JSON.stringify({invitation: {groomName: \'\', brideName:\'\', bgColor:\'#ffffff\'}, elements: []})})"><span class="icon">📄</span><span class="title">Kanvas Kosong (Stabil)</span></div>';
+                    html = '<div class="card-menu" onclick="openEditorWithTemplate({templateID:\'DEF\', name: \'Kanvas Kosong\', configJSON:JSON.stringify({invitation: {groomName: \'\', brideName:\'\', bgColor:\'#ffffff\'}, elements: []})})"><span class="icon">📄</span><span class="title">Kanvas Kosong (Instant)</span></div>';
                 } else { 
                     res.templates.forEach(function(t) {
                         html += '<div class="card-menu" onclick=\'openEditorWithTemplate(' + JSON.stringify(t) + ')\'><span class="icon">✨</span><span class="title">' + t.name + '</span></div>'; 
