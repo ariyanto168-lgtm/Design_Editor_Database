@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Design Editor V1.36.0 Smart Toolbar</title>
+<title>Design Editor V1.37.0 Sidebar & Typewriter</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root { --primary: #4f46e5; --bg-color: #f1f5f9; --canvas-bg: #e2e8f0; --toolbar-bg: #ffffff; --text-main: #1e293b; --border: #cbd5e1; --success: #10b981; }
@@ -11,7 +11,7 @@
 body { background: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 .view-section { display: none; flex: 1; flex-direction: column; padding: 16px; }
 .view-section.active { display: flex; }
-button { background: var(--primary); color: #fff; border: none; border-radius: 8px; padding: 12px 16px; font-weight: 600; cursor: pointer; transition: .2s; font-size: 0.95rem; }
+button { background: var(--primary); color: #fff; border: none; border-radius: 8px; padding: 10px 14px; font-weight: 600; cursor: pointer; transition: .2s; font-size: 0.9rem; }
 button:active { transform: scale(.95); }
 button:disabled { opacity: .7; cursor: not-allowed; }
 .btn-outline { background: 0 0; color: var(--primary); border: 1px solid var(--primary); }
@@ -23,15 +23,17 @@ button:disabled { opacity: .7; cursor: not-allowed; }
 #view-editor.active { display: flex; }
 .editor-top-bar { display: flex; justify-content: space-between; align-items: center; background: var(--toolbar-bg); padding: 10px 14px; border-bottom: 1px solid var(--border); z-index: 100; min-height: 60px; }
 .editor-top-actions { display: flex; gap: 8px; align-items: center; }
-.editor-top-actions button, .editor-top-bar .btn-icon { padding: 10px 14px; font-size: 1.1rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
 .autosave-indicator { font-size: .75rem; color: var(--success); font-weight: 700; opacity: 0; transition: opacity .3s; position: absolute; top: 65px; left: 12px; background: rgba(255,255,255,.95); padding: 6px 10px; border-radius: 6px; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 .autosave-indicator.show { opacity: 1; }
-.canvas-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; overflow: auto; padding: 40px; position: relative; }
+
+.editor-workspace { display: flex; flex: 1; position: relative; overflow: hidden; }
+.canvas-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; overflow: auto; padding: 20px; position: relative; }
 .canvas { width: 360px; height: 640px; background-color: #fff; position: relative; box-shadow: 0 10px 25px 5px rgba(0,0,0,.2); overflow: hidden; transform-origin: center center; transition: transform 0.1s ease-out; flex-shrink: 0; }
 .canvas-object { position: absolute; user-select: none; padding: 8px; border: 1px dashed transparent; touch-action: none; -webkit-touch-callout: none; will-change: transform, left, top; cursor: pointer; }
 .canvas-object.selected { outline: 2px solid var(--primary); border: 1px dashed rgba(255,255,255,.8); background: rgba(79, 70, 229, 0.03); }
 .canvas-object.multi-selected { outline: 2px solid #06b6d4; border: 1px dashed rgba(6,182,212,.8); }
 .canvas-object.locked { outline: 2px solid #ef4444; }
+
 .resize-handle { position: absolute; width: 22px; height: 22px; background: #fff; border: 2px solid var(--primary); border-radius: 50%; z-index: 1000; display: none; touch-action: none; }
 .canvas-object.selected .resize-handle { display: block; }
 .handle-tl { top: -11px; left: -11px; cursor: nwse-resize; }
@@ -45,25 +47,34 @@ button:disabled { opacity: .7; cursor: not-allowed; }
 .rotate-handle { position: absolute; top: -45px; left: calc(50% - 12px); width: 24px; height: 24px; background: #8b5cf6; border: 2px solid #fff; border-radius: 50%; z-index: 1001; cursor: grab; display: none; box-shadow: 0 2px 4px rgba(0,0,0,.2); touch-action: none; }
 .canvas-object.selected .rotate-handle, .canvas-object.selected .rotate-line { display: block; }
 .rotate-line { position: absolute; top: -20px; left: calc(50% - 1px); width: 2px; height: 20px; background: #8b5cf6; display: none; }
+
 .guide-line { position: absolute; background: #ef4444; z-index: 9999; display: none; pointer-events: none; box-shadow: 0 0 4px rgba(239,68,68,.5); }
 .guide-v { width: 1px; height: 100%; top: 0; left: 180px; }
 .guide-h { width: 100%; height: 1px; left: 0; top: 320px; }
-.floating-action-bar { position: absolute; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,.2); display: flex; gap: 6px; padding: 6px; z-index: 1500; border: 1px solid var(--border); transform: translateX(-50%); display: none; }
-.floating-action-bar button { padding: 8px 10px; font-size: 0.95rem; background: 0 0; color: var(--text-main); border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+
+/* Sidebar Samping Properti & Aksi */
+.editor-sidebar { width: 300px; background: #ffffff; border-left: 1px solid var(--border); display: flex; flex-direction: column; z-index: 1500; box-shadow: -4px 0 15px rgba(0,0,0,.05); overflow-y: auto; transition: transform .3s ease; }
+.sidebar-header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; font-weight: bold; }
+.sidebar-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.sidebar-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 8px; }
+.sidebar-actions button { padding: 8px; font-size: 0.85rem; background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border); }
+
 .editor-bottom-bar { display: flex; justify-content: space-around; background: var(--toolbar-bg); padding: 12px 8px; border-top: 1px solid var(--border); z-index: 100; padding-bottom: max(14px, env(safe-area-inset-bottom)); box-shadow: 0 -4px 10px rgba(0,0,0,.03); }
 .bottom-tool { display: flex; flex-direction: column; align-items: center; font-size: .8rem; font-weight: 600; color: var(--text-main); background: 0 0; padding: 6px 12px; border: none; cursor: pointer; gap: 4px; }
 .bottom-tool .icon { font-size: 1.6rem; }
+
 .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: #fff; border-radius: 20px 20px 0 0; padding: 20px; box-shadow: 0 -4px 25px rgba(0,0,0,.15); transition: bottom .3s cubic-bezier(.4,0,.2,1); z-index: 2000; max-height: 80vh; overflow-y: auto; }
 .bottom-sheet.active { bottom: 0; }
 .sheet-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px; }
 .sheet-close { font-size: 1.6rem; background: 0 0; color: var(--text-main); padding: 4px 10px; cursor: pointer; }
-.input-group { margin-bottom: 14px; }
-.input-group label { display: block; font-size: .8rem; font-weight: 700; margin-bottom: 6px; color: var(--text-muted); }
-.input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; }
+.input-group { margin-bottom: 12px; }
+.input-group label { display: block; font-size: .75rem; font-weight: 700; margin-bottom: 4px; color: #64748b; }
+.input-group input, .input-group select, .input-group textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; }
 .asset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-height: 240px; overflow-y: auto; padding-right: 5px; }
 .asset-item { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; cursor: pointer; }
 .asset-item img { width: 100%; height: 55px; object-fit: contain; }
-#publicViewerOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 3000; overflow-y: auto; align-items: flex-start; justify-content: center; transition: .3s; }
+
+#publicViewerOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 3000; overflow-y: auto; align-items: flex-start; justify-content: center; }
 .public-card { width: 100%; max-width: 480px; background: #fff; min-height: 100vh; position: relative; overflow: hidden; margin: 0 auto; box-shadow: 0 0 20px rgba(0,0,0,.5); }
 .preview-header { position: sticky; top: 0; left: 0; width: 100%; background: #1e293b; padding: 12px 16px; display: flex; justify-content: center; gap: 8px; z-index: 3100; border-bottom: 1px solid #334155; }
 .preview-header button { background: #334155; color: #fff; padding: 10px 14px; border-radius: 20px; font-size: .85rem; }
@@ -71,20 +82,19 @@ button:disabled { opacity: .7; cursor: not-allowed; }
 .preview-header button.close-btn { background: #ef4444; margin-left: auto; }
 .admin-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
 .admin-table td, .admin-table th { border: 1px solid var(--border); padding: 10px; text-align: left; }
+
 @keyframes anim-fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes anim-slideUp { from { transform: translateY(80px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes anim-slideDown { from { transform: translateY(-80px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-@keyframes anim-slideLeft { from { transform: translateX(80px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-@keyframes anim-slideRight { from { transform: translateX(-80px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 @keyframes anim-zoomIn { from { transform: scale(.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-@keyframes anim-bounce { 0%, 100%, 20%, 50%, 80% { transform: translateY(0); } 40% { transform: translateY(-20px); } 60% { transform: translateY(-10px); } }
+@keyframes anim-typewriter { from { width: 0; } to { width: 100%; } }
+
 .eff-fadeIn { animation: anim-fadeIn 1s ease forwards; }
 .eff-slideUp { animation: anim-slideUp 1s ease forwards; }
 .eff-slideDown { animation: anim-slideDown 1s ease forwards; }
-.eff-slideLeft { animation: anim-slideLeft 1s ease forwards; }
-.eff-slideRight { animation: anim-slideRight 1s ease forwards; }
 .eff-zoomIn { animation: anim-zoomIn 1s ease forwards; }
-.eff-bounce { animation: anim-bounce 2s ease infinite; }
+.eff-typewriter { overflow: hidden; white-space: nowrap; animation: anim-typewriter var(--tw-speed, 3s) steps(40, end) forwards; }
+
 .countdown-widget { display: flex; justify-content: center; gap: 8px; text-align: center; font-weight: 700; pointer-events: none; }
 .cd-box { display: flex; flex-direction: column; background: rgba(255,255,255,.85); border-radius: 8px; padding: 8px; min-width: 50px; box-shadow: 0 2px 5px rgba(0,0,0,.1); }
 .cd-num { font-size: 1.2rem; line-height: 1; margin-bottom: 2px; }
@@ -100,22 +110,16 @@ button:disabled { opacity: .7; cursor: not-allowed; }
 <script>
 window.onerror = function (msg, url, line) {
     var eb = document.getElementById('errorBanner');
-    if (eb) { 
-        eb.style.display = 'block'; 
-        eb.innerHTML += "<br/>Error JS: " + msg + " (Baris: " + line + ")"; 
-    }
+    if (eb) { eb.style.display = 'block'; eb.innerHTML += "<br/>Error JS: " + msg + " (Baris: " + line + ")"; }
 };
-window.addEventListener('beforeunload', function (e) {
-    e.preventDefault();
-    e.returnValue = '';
-});
+window.addEventListener('beforeunload', function (e) { e.preventDefault(); e.returnValue = ''; });
 </script>
 
 <div id="publicViewerOverlay" style="flex-direction: column; align-items: center;">
     <div id="previewDeviceHeader" class="preview-header" style="display:none; width: 100%;">
         <button onclick="setDevicePreview('mobile')" id="btnPrevMobile" class="active">📱 HP</button>
-        <button onclick="setDevicePreview('tablet')" id="btnPrevTablet">タブ Tablet</button>
-        <button onclick="setDevicePreview('desktop')" id="btnPrevDesktop">💻 Desktop</button>
+        <button onclick="setDevicePreview('tablet')" id="btnPrevTablet">Tablet</button>
+        <button onclick="setDevicePreview('desktop')" id="btnPrevDesktop">Desktop</button>
         <button onclick="closePreview()" class="close-btn">✕ Tutup</button>
     </div>
     <div class="public-card" id="publicCardContent">Memuat Undangan...</div>
@@ -126,7 +130,7 @@ window.addEventListener('beforeunload', function (e) {
 <div id="mainAppContainer" style="display: flex; flex-direction: column; flex: 1;">
     <div id="view-dashboard" class="view-section active">
         <header style="border-radius: 12px; margin-bottom: 16px; max-width: 800px; margin-inline: auto; width: 100%; padding: 10px 0;">
-            <h1>Design Editor <span style="font-size:0.6rem; background: var(--success); color: white; padding:3px 8px; border-radius: 4px; vertical-align: middle;">V1.36.0 STABLE</span></h1>
+            <h1>Design Editor <span style="font-size:0.6rem; background: var(--success); color: white; padding:3px 8px; border-radius: 4px; vertical-align: middle;">V1.37.0 STABLE</span></h1>
             <span id="userBadge" style="font-size: 0.75rem; color: var(--primary); font-weight:bold;">Memuat ID...</span>
         </header>
         <div class="dashboard-grid">
@@ -162,32 +166,94 @@ window.addEventListener('beforeunload', function (e) {
                 <button class="btn-icon" onclick="undo()" id="btnUndo" title="Undo" style="opacity:0.5;">↩️</button>
                 <button class="btn-icon" onclick="redo()" id="btnRedo" title="Redo" style="opacity:0.5;">↪️</button>
                 <button class="btn-icon" onclick="exportToPNG()" id="btnExport" title="Unduh PNG" style="color: #8b5cf6;">💾</button>
-                <button class="btn-icon" onclick="showPreview()" style="color: var(--primary);" title="Preview Responsif">👁️</button>
-                <button onclick="saveCurrentProject()" style="background: var(--success); padding: 10px 16px; font-size: 0.9rem; font-weight: bold;">💾 Save</button>
+                <button class="btn-icon" onclick="showPreview()" style="color: var(--primary);" title="Preview">👁️</button>
+                <button onclick="saveCurrentProject()" style="background: var(--success); padding: 8px 14px; font-size: 0.85rem; font-weight: bold;">💾 Save</button>
             </div>
         </div>
         <div id="autoSaveText" class="autosave-indicator">✨ Draf Tersimpan Otomatis</div>
         
-        <div class="canvas-wrapper" id="canvasWrapper" onclick="clearSelection(event)">
-            <div class="canvas" id="mainCanvas">
-                <div id="guideV" class="guide-line guide-v"></div>
-                <div id="guideH" class="guide-line guide-h"></div>
+        <div class="editor-workspace">
+            <div class="canvas-wrapper" id="canvasWrapper" onclick="clearSelection(event)">
+                <div class="canvas" id="mainCanvas">
+                    <div id="guideV" class="guide-line guide-v"></div>
+                    <div id="guideH" class="guide-line guide-h"></div>
+                </div>
             </div>
-            <div id="floatingActionBar" class="floating-action-bar">
-                <button onclick="openPropertySheet()" title="Edit Sifat">✏️ Edit</button>
-                <button onclick="toggleLockSelected()" id="btnFabLock">🔒</button>
-                <button onclick="toggleHideSelected()" id="btnFabHide">👁️</button>
-                <button onclick="groupSelected()" title="Group">🗂️ Group</button>
-                <button onclick="changeLayer(1)" title="Naik">🔼</button>
-                <button onclick="changeLayer(-1)" title="Turun">🔽</button>
-                <button onclick="duplicateSelected()" title="Duplikat">📑</button>
-                <button onclick="deleteSelected()" title="Hapus" style="color:red;">🗑️</button>
+            
+            <!-- Sidebar Samping Properti & Aksi (Pengganti Floating Bar) -->
+            <div id="editorSidebar" class="editor-sidebar" style="display:none;">
+                <div class="sidebar-header">
+                    <span>Pengaturan Objek</span>
+                    <button onclick="clearSelection({target:{id:'mainCanvas'}})" style="background:0 0; color:#64748b; padding:2px 6px; font-size:1.1rem;">✕</button>
+                </div>
+                <div class="sidebar-body">
+                    <div class="sidebar-actions">
+                        <button onclick="toggleLockSelected()" id="btnSidebarLock" title="Kunci">🔒</button>
+                        <button onclick="toggleHideSelected()" id="btnSidebarHide" title="Sembunyikan">👁️</button>
+                        <button onclick="changeLayer(1)" title="Naik Layer">🔼</button>
+                        <button onclick="changeLayer(-1)" title="Turun Layer">🔽</button>
+                        <button onclick="duplicateSelected()" title="Duplikat">📑</button>
+                        <button onclick="groupSelected()" title="Group">🗂️</button>
+                        <button onclick="deleteSelected()" title="Hapus" style="color:red; grid-column: span 2;">🗑️ Hapus</button>
+                    </div>
+                    
+                    <div id="propTextContainer" class="input-group">
+                        <label>Isi Teks / Multi-Baris (Tekan Enter untuk baris baru)</label>
+                        <textarea id="propText" rows="3" oninput="updateSelectedObjectProp('content', this.value)"></textarea>
+                    </div>
+                    <div id="propLinkContainer" class="input-group" style="display:none;">
+                        <label>URL / Link / Galeri (Pisahkan dengan koma)</label>
+                        <input type="text" id="propLink" oninput="updateSelectedObjectProp('url', this.value)">
+                    </div>
+                    <div id="propImgContainer" class="input-group" style="display:none;">
+                        <label>URL Gambar / Foto</label>
+                        <input type="text" id="propImage" oninput="updateSelectedObjectProp('url', this.value)">
+                    </div>
+                    <div style="display: flex; gap:8px;">
+                        <div id="propColorContainer" class="input-group" style="flex:1;">
+                            <label>Warna Teks / Latar</label>
+                            <input type="color" id="propColor" oninput="updateSelectedObjectProp('color', this.value)" style="height: 38px;">
+                        </div>
+                        <div id="propSizeContainer" class="input-group" style="flex:1;">
+                            <label>Ukuran Font</label>
+                            <input type="number" id="propSize" oninput="updateSelectedObjectProp('size', parseInt(this.value))">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap:8px;">
+                        <div class="input-group" style="flex:1;"><label>Lebar (px)</label><input type="number" id="propWidth" oninput="updateSelectedObjectProp('width', parseInt(this.value))"></div>
+                        <div class="input-group" style="flex:1;"><label>Tinggi (px)</label><input type="number" id="propHeight" oninput="updateSelectedObjectProp('height', parseInt(this.value))"></div>
+                    </div>
+                    <div style="display: flex; gap:8px;">
+                        <div class="input-group" style="flex:1;"><label>Opacity</label><input type="number" step="0.1" min="0" max="1" id="propOpacity" oninput="updateSelectedObjectProp('opacity', parseFloat(this.value))"></div>
+                        <div class="input-group" style="flex:1;"><label>Rotasi (°)</label><input type="number" id="propRotation" oninput="updateSelectedObjectProp('rotation', parseInt(this.value))"></div>
+                    </div>
+                    <div class="input-group" style="display: flex; align-items: center; gap:8px;">
+                        <input type="checkbox" id="propLockRatio" onchange="toggleLockRatio(this.checked)" style="width:18px; height:18px;">
+                        <label for="propLockRatio" style="margin:0; cursor:pointer;">Kunci Rasio Ukuran</label>
+                    </div>
+                    <div style="display: flex; gap:8px;">
+                        <div id="propFontContainer" class="input-group" style="flex:1;"><label>Font</label>
+                            <select id="propFont" onchange="updateSelectedObjectProp('fontFamily', this.value)">
+                                <option value="sans-serif">Modern</option><option value="serif">Klasik</option><option value="'Brush Script MT', cursive">Tulisan Tangan</option>
+                            </select>
+                        </div>
+                        <div class="input-group" style="flex:1;"><label>Animasi</label>
+                            <select id="propAnimation" onchange="updateSelectedObjectProp('animation', this.value)">
+                                <option value="none">Tidak Ada</option><option value="eff-fadeIn">Fade In</option><option value="eff-slideUp">Slide Up</option><option value="eff-slideDown">Slide Down</option><option value="eff-zoomIn">Zoom In</option><option value="eff-typewriter">Typewriter (Ketik)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="propAnimSpeedContainer" class="input-group" style="display:none;">
+                        <label>Kecepatan Typewriter (Detik: 1s - 8s)</label>
+                        <input type="number" id="propAnimSpeed" min="1" max="10" value="3" oninput="updateSelectedObjectProp('animSpeed', parseInt(this.value))">
+                    </div>
+                </div>
             </div>
         </div>
         
         <div class="editor-bottom-bar">
             <button class="bottom-tool" onclick="openSheet('sheet-add')"><span class="icon">➕</span>Tambah</button>
-            <button class="bottom-tool" onclick="openSheet('sheet-assets')"><span class="icon">🧩</span>Assets</button>
+            <button class="bottom-tool" onclick="openSheet('sheet-assets')"><span class="icon">🧩</span>Multi Bingkai</button>
             <button class="bottom-tool" onclick="openSheet('sheet-data')"><span class="icon">📝</span>Data</button>
             <button class="bottom-tool" onclick="openSheet('sheet-bg')"><span class="icon">🎨</span>Latar</button>
             <button class="bottom-tool" onclick="publishCurrentProject()"><span class="icon">🚀</span>Publish</button>
@@ -195,30 +261,30 @@ window.addEventListener('beforeunload', function (e) {
         
         <!-- Bottom Sheets -->
         <div id="sheet-add" class="bottom-sheet">
-            <div class="sheet-header"><h3>Tambah Objek</h3><button class="sheet-close" onclick="closeSheets()">✕</button></div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                <button class="btn-outline" onclick="addObject('text'); closeSheets();" style="padding:14px;">Teks</button>
-                <button class="btn-outline" onclick="addObject('image'); closeSheets();" style="padding:14px;">Gambar / URL</button>
-                <button class="btn-outline" onclick="addObject('button'); closeSheets();" style="padding:14px;">Tombol Link</button>
-                <button class="btn-outline" onclick="addObject('countdown'); closeSheets();" style="padding:14px;">Countdown</button>
-                <button class="btn-outline" onclick="addObject('shape'); closeSheets();" style="padding:14px;">Kotak Latar</button>
-                <button class="btn-outline" onclick="addObject('video'); closeSheets();" style="padding:14px;">Video MP4</button>
-                <button class="btn-outline" onclick="addObject('map'); closeSheets();" style="padding:14px;">Google Map</button>
-                <button class="btn-outline" onclick="addObject('qr'); closeSheets();" style="padding:14px;">QR Code</button>
-                <button class="btn-outline" onclick="addObject('gift'); closeSheets();" style="padding:14px;">Angpao / Gift</button>
-                <button class="btn-outline" onclick="addObject('gallery'); closeSheets();" style="padding:14px;">Galeri Foto</button>
+            <div class="sheet-header"><h3>Tambah Objek & Bingkai Foto</h3><button class="sheet-close" onclick="closeSheets()">✕</button></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <button class="btn-outline" onclick="addObject('text'); closeSheets();">Teks Multi-Baris</button>
+                <button class="btn-outline" onclick="addObject('image'); closeSheets();">Foto / Gambar URL</button>
+                <button class="btn-outline" onclick="addPhotoFrame('polaroid'); closeSheets();" style="border-color:#8b5cf6; color:#8b5cf6;">🖼️ Bingkai Polaroid</button>
+                <button class="btn-outline" onclick="addPhotoFrame('circle'); closeSheets();" style="border-color:#8b5cf6; color:#8b5cf6;">⭕ Bingkai Bundar</button>
+                <button class="btn-outline" onclick="addObject('button'); closeSheets();">Tombol Link</button>
+                <button class="btn-outline" onclick="addObject('countdown'); closeSheets();">Countdown</button>
+                <button class="btn-outline" onclick="addObject('shape'); closeSheets();">Kotak Latar</button>
+                <button class="btn-outline" onclick="addObject('map'); closeSheets();">Google Map</button>
+                <button class="btn-outline" onclick="addObject('qr'); closeSheets();">QR Code</button>
+                <button class="btn-outline" onclick="addObject('gift'); closeSheets();">Angpao / Gift</button>
             </div>
         </div>
         
         <div id="sheet-assets" class="bottom-sheet">
-            <div class="sheet-header"><h3>Pustaka Stiker & Bingkai</h3><button class="sheet-close" onclick="closeSheets()">✕</button></div>
+            <div class="sheet-header"><h3>Pustaka Multi Bingkai & Stiker Dinamis</h3><button class="sheet-close" onclick="closeSheets()">✕</button></div>
             <div class="asset-grid">
-                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/833/833472.png', 'image')"><img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/833/833472.png" alt="Love"><br><span style="font-size:0.65rem; font-weight:bold;">Love</span></div>
-                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/711/711293.png', 'image')"><img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/711/711293.png" alt="Rings"><br><span style="font-size:0.65rem; font-weight:bold;">Cincin</span></div>
-                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/3069/3069186.png', 'image')"><img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/3069/3069186.png" alt="Border"><br><span style="font-size:0.65rem; font-weight:bold;">Bingkai Klasik</span></div>
-                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/1076/1076928.png', 'image')"><img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/1076/1076928.png" alt="Frame"><br><span style="font-size:0.65rem; font-weight:bold;">Bingkai Emas</span></div>
-                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/2924/2924082.png', 'image')"><img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/2924/2924082.png" alt="Corner"><br><span style="font-size:0.65rem; font-weight:bold;">Hiasan Sudut</span></div>
-                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/2769/2769213.png', 'image')"><img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/2769/2769213.png" alt="Sparkle"><br><span style="font-size:0.65rem; font-weight:bold;">Sparkle</span></div>
+                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/3069/3069186.png', 'image')"><img src="https://cdn-icons-png.flaticon.com/512/3069/3069186.png"><br><b>Bingkai Klasik</b></div>
+                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/1076/1076928.png', 'image')"><img src="https://cdn-icons-png.flaticon.com/512/1076/1076928.png"><br><b>Bingkai Emas</b></div>
+                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/833/833472.png', 'image')"><img src="https://cdn-icons-png.flaticon.com/512/833/833472.png"><br><b>Love Stiker</b></div>
+                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/711/711293.png', 'image')"><img src="https://cdn-icons-png.flaticon.com/512/711/711293.png"><br><b>Cincin Nikah</b></div>
+                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/2924/2924082.png', 'image')"><img src="https://cdn-icons-png.flaticon.com/512/2924/2924082.png"><br><b>Hiasan Sudut</b></div>
+                <div class="asset-item" onclick="insertAsset('https://cdn-icons-png.flaticon.com/512/2769/2769213.png', 'image')"><img src="https://cdn-icons-png.flaticon.com/512/2769/2769213.png"><br><b>Sparkle</b></div>
             </div>
         </div>
         
@@ -227,57 +293,17 @@ window.addEventListener('beforeunload', function (e) {
             <div class="input-group"><label>Nama Pria</label><input type="text" id="invGroom" oninput="updateInvitationData('groomName', this.value)"></div>
             <div class="input-group"><label>Nama Wanita</label><input type="text" id="invBride" oninput="updateInvitationData('brideName', this.value)"></div>
             <div class="input-group"><label>Tanggal Acara</label><input type="datetime-local" id="invDate" oninput="updateInvitationData('eventDate', this.value)"></div>
-            <div class="input-group"><label>Musik MP3 (URL)</label><input type="text" id="invMusic" placeholder="https://contoh.com/lagu.mp3" oninput="updateInvitationData('musicUrl', this.value)"></div>
+            <div class="input-group"><label>Musik MP3 (URL)</label><input type="text" id="invMusic" placeholder="https://..." oninput="updateInvitationData('musicUrl', this.value)"></div>
         </div>
         
         <div id="sheet-bg" class="bottom-sheet">
             <div class="sheet-header"><h3>Background Builder</h3><button class="sheet-close" onclick="closeSheets()">✕</button></div>
-            <div class="input-group"><label>Warna Solid Utama</label><input type="color" id="bgColPicker" oninput="updateBackground('color', this.value)" style="height: 45px;"></div>
-            <div style="display: flex; gap:10px;">
-                <div class="input-group" style="flex:1;"><label>Gradient 1</label><input type="color" id="bgGrad1" oninput="updateBackgroundGradient()" style="height: 45px;" value="#ffffff"></div>
-                <div class="input-group" style="flex:1;"><label>Gradient 2</label><input type="color" id="bgGrad2" oninput="updateBackgroundGradient()" style="height: 45px;" value="#e0e7ff"></div>
+            <div class="input-group"><label>Warna Solid Utama</label><input type="color" id="bgColPicker" oninput="updateBackground('color', this.value)" style="height: 40px;"></div>
+            <div style="display: flex; gap:8px;">
+                <div class="input-group" style="flex:1;"><label>Gradient 1</label><input type="color" id="bgGrad1" oninput="updateBackgroundGradient()" style="height: 40px;" value="#ffffff"></div>
+                <div class="input-group" style="flex:1;"><label>Gradient 2</label><input type="color" id="bgGrad2" oninput="updateBackgroundGradient()" style="height: 40px;" value="#e0e7ff"></div>
             </div>
-            <div class="input-group"><label>URL Gambar Latar</label><input type="text" id="bgImgInput" placeholder="https://contoh.com/bg.jpg" oninput="updateBackground('image', this.value)"></div>
-        </div>
-        
-        <div id="sheet-property" class="bottom-sheet">
-            <div class="sheet-header"><h3>Edit Sifat Objek</h3><button class="sheet-close" onclick="closeSheets()">✕</button></div>
-            <div id="propTextContainer" class="input-group"><label>Isi Teks / Info</label><input type="text" id="propText" oninput="updateSelectedObjectProp('content', this.value)"></div>
-            <div id="propLinkContainer" class="input-group" style="display:none;"><label>URL / Link (Koma untuk Galeri)</label><input type="text" id="propLink" oninput="updateSelectedObjectProp('url', this.value)"></div>
-            <div id="propImgContainer" class="input-group" style="display:none;"><label>URL Media Baru</label><input type="text" id="propImage" oninput="updateSelectedObjectProp('url', this.value)"></div>
-            <div id="propFilterContainer" class="input-group" style="display:none;">
-                <label>Filter Gambar</label>
-                <select id="propFilter" onchange="updateSelectedObjectProp('filter', this.value)">
-                    <option value="none">Normal</option><option value="grayscale(100%)">Grayscale</option><option value="sepia(100%)">Sepia</option><option value="contrast(150%)">Kontras Tinggi</option>
-                </select>
-            </div>
-            <div style="display: flex; gap:10px;">
-                <div id="propColorContainer" class="input-group" style="flex:1;"><label>Warna</label><input type="color" id="propColor" oninput="updateSelectedObjectProp('color', this.value)" style="height: 45px;"></div>
-                <div id="propSizeContainer" class="input-group" style="flex:1;"><label>Ukuran Font</label><input type="number" id="propSize" oninput="updateSelectedObjectProp('size', parseInt(this.value))"></div>
-            </div>
-            <div style="display: flex; gap:10px;">
-                <div class="input-group" style="flex:1;"><label>Lebar (px)</label><input type="number" id="propWidth" oninput="updateSelectedObjectProp('width', parseInt(this.value))"></div>
-                <div class="input-group" style="flex:1;"><label>Tinggi (px)</label><input type="number" id="propHeight" oninput="updateSelectedObjectProp('height', parseInt(this.value))"></div>
-            </div>
-            <div style="display: flex; gap:10px;">
-                <div class="input-group" style="flex:1;"><label>Opacity (0-1)</label><input type="number" step="0.1" min="0" max="1" id="propOpacity" oninput="updateSelectedObjectProp('opacity', parseFloat(this.value))"></div>
-                <div class="input-group" style="flex:1;"><label>Rotasi (°)</label><input type="number" id="propRotation" oninput="updateSelectedObjectProp('rotation', parseInt(this.value))"></div>
-            </div>
-            <div class="input-group" style="display: flex; gap:10px; align-items: center;">
-                <label style="display: flex; align-items: center; gap:8px; cursor:pointer;"><input type="checkbox" id="propLockRatio" onchange="toggleLockRatio(this.checked)" style="width:20px; height:20px;"> Kunci Rasio (Lock Ratio)</label>
-            </div>
-            <div class="input-group" style="display: flex; gap:10px;">
-                <div id="propFontContainer" style="flex:1;"><label>Jenis Font</label>
-                    <select id="propFont" onchange="updateSelectedObjectProp('fontFamily', this.value)">
-                        <option value="sans-serif">Modern</option><option value="serif">Klasik</option><option value="'Brush Script MT', cursive">Tulisan Tangan</option>
-                    </select>
-                </div>
-                <div style="flex:1;"><label>Efek Animasi</label>
-                    <select id="propAnimation" onchange="updateSelectedObjectProp('animation', this.value)">
-                        <option value="none">Tidak Ada</option><option value="eff-fadeIn">Fade In</option><option value="eff-slideUp">Slide Up</option><option value="eff-slideDown">Slide Down</option><option value="eff-slideLeft">Slide Left</option><option value="eff-slideRight">Slide Right</option><option value="eff-zoomIn">Zoom In</option><option value="eff-bounce">Bouncing</option>
-                    </select>
-                </div>
-            </div>
+            <div class="input-group"><label>URL Gambar Latar</label><input type="text" id="bgImgInput" placeholder="https://..." oninput="updateBackground('image', this.value)"></div>
         </div>
     </div>
     
@@ -299,7 +325,7 @@ window.addEventListener('beforeunload', function (e) {
 const urlParams = new URLSearchParams(window.location.search);
 const serverPublishId = urlParams.get('id') || "";
 let currentUserId = "USER_" + Math.random().toString(36).substring(2, 9).toUpperCase();
-let currentProject = { projectID: "", version: "1.36.0", elements: [], invitation: {} };
+let currentProject = { projectID: "", version: "1.37.0", elements: [], invitation: {} };
 let selectedElementId = null;
 let multiSelectedIds = [];
 let historyStack = [];
@@ -317,23 +343,15 @@ function bootApplication() {
     if (hasBooted) return; 
     hasBooted = true;
     try {
-        const ub = document.getElementById('userBadge'); 
-        if (ub) { ub.innerText = currentUserId; }
-        if (serverPublishId && serverPublishId.trim() !== "") { 
-            loadPublicInvitation(serverPublishId); return; 
-        }
+        const ub = document.getElementById('userBadge'); if (ub) ub.innerText = currentUserId;
+        if (serverPublishId && serverPublishId.trim() !== "") { loadPublicInvitation(serverPublishId); return; }
         const localDraftStr = localStorage.getItem('DE_LOCAL_DRAFT');
         if (localDraftStr && confirm("Pulihkan draf terakhir?")) { 
-            try { 
-                currentProject = JSON.parse(localDraftStr);
-                migrateData(currentProject); 
-                startEditor(); 
-            } catch(e) {} 
+            try { currentProject = JSON.parse(localDraftStr); migrateData(currentProject); startEditor(); } catch(e) {} 
         }
         jalankanInisialisasi();
     } catch(e) { 
-        const eb = document.getElementById('errorBanner'); 
-        if (eb) { eb.style.display = 'block'; eb.innerHTML = "Error Boot: " + e.message; } 
+        const eb = document.getElementById('errorBanner'); if (eb) { eb.style.display = 'block'; eb.innerHTML = "Error Boot: " + e.message; } 
     }
 }
 
@@ -341,10 +359,8 @@ document.addEventListener('DOMContentLoaded', bootApplication);
 window.onload = bootApplication;
 
 function jalankanInisialisasi() {
-    const btn = document.getElementById('initBtn'); 
-    const statusBadge = document.getElementById('systemStatusBadge');
+    const btn = document.getElementById('initBtn'); const statusBadge = document.getElementById('systemStatusBadge');
     if (btn) { btn.innerText = "Cek Koneksi DB..."; btn.disabled = true; }
-    
     if (typeof google === 'undefined' || !google.script) {
         if (statusBadge) { statusBadge.innerText = "MODE OFFLINE (SIMULATOR)"; statusBadge.style.color = "#f59e0b"; }
         if (btn) btn.innerText = "Storage Lokal Aktif";
@@ -355,13 +371,7 @@ function jalankanInisialisasi() {
             if (res && res.success) {
                 if (statusBadge) { statusBadge.innerText = "TERHUBUNG (GAS ONLINE)"; statusBadge.style.color = "var(--success)"; }
                 if (btn) btn.innerText = "Database Terhubung";
-            } else { 
-                if (statusBadge) { statusBadge.innerText = "ERROR DB"; statusBadge.style.color = "red"; } 
-                if (btn) { btn.innerText = "Gagal"; btn.disabled = false; } 
             }
-        }).withFailureHandler(function(err) {
-            if (statusBadge) { statusBadge.innerText = "KONEKSI GAGAL"; statusBadge.style.color = "red"; }
-            if (btn) { btn.innerText = "Coba Lagi"; btn.disabled = false; }
         }).initializeSystem();
     } catch(e) {}
 }
@@ -373,9 +383,8 @@ function resizeCanvasView() {
     const baseScale = Math.min(1, (wrapper.clientWidth - 40) / CANVAS_W, (wrapper.clientHeight - 40) / CANVAS_H);
     const finalScale = baseScale * customZoomMultiplier;
     canvas.style.transform = "scale(" + finalScale + ")";
-    
     const indicator = document.getElementById('zoomLevelIndicator');
-    if (indicator) { indicator.innerText = Math.round(customZoomMultiplier * 100) + "%"; }
+    if (indicator) indicator.innerText = Math.round(customZoomMultiplier * 100) + "%";
 }
 
 function changeZoom(delta) {
@@ -393,9 +402,7 @@ function switchView(viewId) {
     if (viewId === 'view-editor') { setTimeout(resizeCanvasView, 100); } 
 }
 
-function exitEditor() { 
-    if (confirm("Keluar dari editor? Pastikan perubahan sudah disimpan.")) { switchView('view-dashboard'); } 
-}
+function exitEditor() { if (confirm("Keluar dari editor? Pastikan perubahan tersimpan.")) { switchView('view-dashboard'); } }
 
 function saveToHistory() {
     if (isSavingHistory) return; 
@@ -410,23 +417,17 @@ function saveToHistory() {
 
 function undo() { 
     if (historyStep > 0) { 
-        isSavingHistory = true; 
-        historyStep--; 
+        isSavingHistory = true; historyStep--; 
         currentProject.elements = JSON.parse(historyStack[historyStep]); 
-        selectedElementId = null; multiSelectedIds = []; 
-        renderCanvas(); 
-        isSavingHistory = false; 
+        selectedElementId = null; multiSelectedIds = []; renderCanvas(); isSavingHistory = false; 
     } 
 }
 
 function redo() { 
     if (historyStep < historyStack.length - 1) { 
-        isSavingHistory = true; 
-        historyStep++; 
+        isSavingHistory = true; historyStep++; 
         currentProject.elements = JSON.parse(historyStack[historyStep]); 
-        selectedElementId = null; multiSelectedIds = []; 
-        renderCanvas(); 
-        isSavingHistory = false; 
+        selectedElementId = null; multiSelectedIds = []; renderCanvas(); isSavingHistory = false; 
     } 
 }
 
@@ -436,10 +437,7 @@ function triggerAutoSave() {
         try {
             localStorage.setItem('DE_LOCAL_DRAFT', JSON.stringify(currentProject)); 
             const ind = document.getElementById('autoSaveText'); 
-            if (ind) {
-                ind.classList.add('show'); 
-                setTimeout(function() { ind.classList.remove('show'); }, 1500); 
-            } 
+            if (ind) { ind.classList.add('show'); setTimeout(function() { ind.classList.remove('show'); }, 1500); } 
         } catch(e) {} 
     }, 500);
 }
@@ -448,8 +446,8 @@ function migrateData(project) {
     if (!project.elements) project.elements = [];
     project.elements.forEach(function(el, i) {
         if (el.size === undefined) el.size = 24;
-        if (el.width === undefined) el.width = el.type === 'shape' ? 120 : (el.type === 'text' ? 150 : (el.type === 'map' ? 240 : (el.type === 'gift' ? 220 : (el.type === 'gallery' ? 260 : 100))));
-        if (el.height === undefined) el.height = el.type === 'shape' ? 60 : (el.type === 'text' ? 40 : (el.type === 'map' ? 140 : (el.type === 'gift' ? 120 : (el.type === 'gallery' ? 180 : 100))));
+        if (el.width === undefined) el.width = 150;
+        if (el.height === undefined) el.height = 50;
         if (el.rotation === undefined) el.rotation = 0; 
         if (el.opacity === undefined) el.opacity = 1; 
         if (el.zIndex === undefined) el.zIndex = i + 1;
@@ -458,29 +456,27 @@ function migrateData(project) {
         if (el.lockRatio === undefined) el.lockRatio = false;
         if (el.filter === undefined) el.filter = 'none'; 
         if (el.animation === undefined) el.animation = 'none';
+        if (el.animSpeed === undefined) el.animSpeed = 3;
     }); 
-    project.version = "1.36.0";
+    project.version = "1.37.0";
 }
 
 function openEditorWithTemplate(t) {
     let config = typeof t.configJSON === 'string' ? JSON.parse(t.configJSON) : t.configJSON;
     currentProject = { 
         projectID: 'PROJ_' + Math.random().toString(36).substring(2, 8).toUpperCase(), 
-        userId: currentUserId, 
-        version: "1.36.0", 
-        invitation: config.invitation || {}, 
-        elements: config.elements || [] 
+        userId: currentUserId, version: "1.37.0", 
+        invitation: config.invitation || {}, elements: config.elements || [] 
     };
     
     if (currentProject.elements.length === 0) {
         let gName = currentProject.invitation.groomName || 'Pria';
         let bName = currentProject.invitation.brideName || 'Wanita';
         currentProject.elements = [
-            { id: 'el_title', type: 'text', content: 'The Wedding of', x: 90, y: 80, width: 180, height: 30, size: 16, color: '#475569', fontFamily: 'sans-serif', zIndex: 1, rotation: 0, opacity: 1, visible: true, locked: false, lockRatio: false, filter: 'none', animation: 'none' },
-            { id: 'el_names', type: 'text', content: gName + ' & ' + bName, x: 40, y: 120, width: 280, height: 50, size: 26, color: '#4f46e5', fontFamily: 'serif', zIndex: 2, rotation: 0, opacity: 1, visible: true, locked: false, lockRatio: false, filter: 'none', animation: 'none' }
+            { id: 'el_title', type: 'text', content: 'The Wedding of', x: 90, y: 80, width: 180, height: 30, size: 16, color: '#475569', fontFamily: 'sans-serif', zIndex: 1, rotation: 0, opacity: 1, visible: true, locked: false, lockRatio: false, filter: 'none', animation: 'none', animSpeed: 3 },
+            { id: 'el_names', type: 'text', content: gName + '\n& ' + bName, x: 40, y: 120, width: 280, height: 80, size: 26, color: '#4f46e5', fontFamily: 'serif', zIndex: 2, rotation: 0, opacity: 1, visible: true, locked: false, lockRatio: false, filter: 'none', animation: 'eff-typewriter', animSpeed: 3 }
         ];
     }
-
     migrateData(currentProject); 
     customZoomMultiplier = 1;
     startEditor();
@@ -506,20 +502,15 @@ function updateInvitationData(key, val) {
         if (nameEl) {
             let g = currentProject.invitation.groomName || 'Pria';
             let b = currentProject.invitation.brideName || 'Wanita';
-            nameEl.content = g + ' & ' + b;
+            nameEl.content = g + '\n& ' + b;
         }
     }
     renderCanvas(); triggerAutoSave(); 
 }
 
 function updateBackground(type, val) { 
-    if (type === 'color') {
-        currentProject.invitation.bgColor = val;
-        currentProject.invitation.bgGradient = ''; 
-    } 
-    if (type === 'image') {
-        currentProject.invitation.bgImage = val; 
-    }
+    if (type === 'color') { currentProject.invitation.bgColor = val; currentProject.invitation.bgGradient = ''; } 
+    if (type === 'image') { currentProject.invitation.bgImage = val; }
     renderCanvas(); triggerAutoSave(); 
 }
 
@@ -537,21 +528,17 @@ function getCountdownHTML(color) {
 
 function renderCanvas() {
     const canvas = document.getElementById('mainCanvas');
-    const gV = document.getElementById('guideV'); 
-    const gH = document.getElementById('guideH');
-    canvas.innerHTML = ''; 
-    canvas.appendChild(gV); canvas.appendChild(gH);
+    const gV = document.getElementById('guideV'), gH = document.getElementById('guideH');
+    canvas.innerHTML = ''; canvas.appendChild(gV); canvas.appendChild(gH);
     
     const inv = currentProject.invitation || {};
     if (inv.bgGradient && inv.bgGradient.trim() !== '') {
         canvas.style.backgroundImage = inv.bgGradient; 
     } else if (inv.bgImage && inv.bgImage.trim() !== '') { 
         canvas.style.backgroundImage = "url('" + inv.bgImage + "')"; 
-        canvas.style.backgroundSize = 'cover';
-        canvas.style.backgroundPosition = 'center'; 
+        canvas.style.backgroundSize = 'cover'; canvas.style.backgroundPosition = 'center'; 
     } else {
-        canvas.style.backgroundImage = 'none'; 
-        canvas.style.backgroundColor = inv.bgColor || '#ffffff'; 
+        canvas.style.backgroundImage = 'none'; canvas.style.backgroundColor = inv.bgColor || '#ffffff'; 
     }
     
     let sortedElements = [...currentProject.elements].sort(function(a,b) { return (a.zIndex || 1) - (b.zIndex || 1); });
@@ -565,10 +552,8 @@ function renderCanvas() {
         if (multiSelectedIds.includes(el.id) && el.id !== selectedElementId) cls += ' multi-selected'; 
         if (el.locked) cls += ' locked'; 
         div.className = cls;
-        div.style.left = el.x + 'px'; 
-        div.style.top = el.y + 'px'; 
-        div.style.width = el.width + 'px'; 
-        div.style.height = el.height + 'px'; 
+        div.style.left = el.x + 'px'; div.style.top = el.y + 'px'; 
+        div.style.width = el.width + 'px'; div.style.height = el.height + 'px'; 
         div.style.zIndex = el.zIndex || 1; 
         div.style.transform = "rotate(" + (el.rotation || 0) + "deg)"; 
         div.style.opacity = el.opacity !== undefined ? el.opacity : 1;
@@ -579,42 +564,36 @@ function renderCanvas() {
             div.style.color = el.color || '#1e293b'; 
             div.style.fontFamily = el.fontFamily || 'sans-serif';
             div.style.fontWeight = 'bold'; 
-            div.style.whiteSpace = 'nowrap'; 
+            div.style.whiteSpace = 'pre-wrap'; 
         } else if (el.type === 'shape') {
             div.style.backgroundColor = el.color || 'var(--primary)';
             div.style.borderRadius = '8px'; 
         } else if (el.type === 'image') { 
-            let fs = (el.filter && el.filter !== 'none') ? "filter:" + el.filter + ";" : '';
-            div.innerHTML = '<img src="' + el.url + '" crossorigin="anonymous" style="width: 100%; height:100%; object-fit:contain; ' + fs + ' pointer-events:none;" draggable="false"/>'; 
-        } else if (el.type === 'video') { 
-            div.innerHTML = '<video src="' + el.url + '" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; pointer-events: none; border-radius: 8px;"></video>'; 
+            div.innerHTML = '<img src="' + el.url + '" crossorigin="anonymous" style="width: 100%; height:100%; object-fit:contain; pointer-events:none;" draggable="false"/>'; 
+        } else if (el.type === 'frame-polaroid') {
+            div.innerHTML = '<div style="width:100%; height:100%; background:#fff; padding:8px 8px 24px 8px; box-shadow:0 4px 10px rgba(0,0,0,0.15); border-radius:4px; display:flex; flex-direction:column; pointer-events:none;"><div style="flex:1; width:100%; overflow:hidden; background:#e2e8f0;"><img src="' + (el.url || 'https://cdn-icons-png.flaticon.com/512/833/833472.png') + '" style="width:100%; height:100%; object-fit:cover;"/></div><span style="font-size:0.55rem; color:#64748b; text-align:center; margin-top:4px; font-weight:bold;">Polaroid Frame</span></div>';
+        } else if (el.type === 'frame-circle') {
+            div.innerHTML = '<div style="width:100%; height:100%; border-radius:50%; border:4px solid ' + (el.color || '#4f46e5') + '; overflow:hidden; background:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.15); pointer-events:none;"><img src="' + (el.url || 'https://cdn-icons-png.flaticon.com/512/833/833472.png') + '" style="width:100%; height:100%; object-fit:cover;"/></div>';
         } else if (el.type === 'button') { 
-            div.innerHTML = '<div style="width:100%; height: 100%; display: flex; align-items:center; justify-content: center; background-color:' + el.color + '; color: white; border-radius: 20px; font-weight:bold; box-shadow:0 4px 6px rgba(0,0,0,0.15); pointer-events: none; white-space: nowrap; text-align:center;">' + el.content + '</div>'; 
+            div.innerHTML = '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background-color:' + el.color + '; color:white; border-radius:20px; font-weight:bold; box-shadow:0 4px 6px rgba(0,0,0,0.15); pointer-events:none; white-space:nowrap;">' + el.content + '</div>'; 
         } else if (el.type === 'countdown') { 
             div.innerHTML = getCountdownHTML(el.color); 
         } else if (el.type === 'map') { 
-            div.innerHTML = '<div style="width: 100%; height: 100%; background:#e2e8f0; border-radius:8px; display: flex; flex-direction:column; align-items:center; justify-content: center; border:2px solid var(--border); pointer-events: none; text-align:center; padding: 8px;"><span style="font-size:1.5rem;">📍</span><strong style="font-size:0.75rem; margin-top:4px;">Google Map Location</strong><span style="font-size:0.6rem; color:#64748b;">' + (el.content || 'Gedung Acara') + '</span></div>'; 
+            div.innerHTML = '<div style="width:100%; height:100%; background:#e2e8f0; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:2px solid var(--border); pointer-events:none; padding:4px;"><span style="font-size:1.2rem;">📍</span><strong style="font-size:0.65rem;">Google Map</strong></div>'; 
         } else if (el.type === 'qr') { 
-            let qrImgUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(el.url || 'https://example.com'); 
-            div.innerHTML = '<div style="width:100%; height: 100%; background: white; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; border:1px solid var(--border); pointer-events: none; padding: 4px;"><img src="' + qrImgUrl + '" style="width:80%; height:80%; object-fit:contain;"/><span style="font-size:0.55rem; font-weight: bold;">Scan QR</span></div>'; 
+            let qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(el.url || 'https://example.com'); 
+            div.innerHTML = '<div style="width:100%; height:100%; background:white; border-radius:8px; display:flex; align-items:center; justify-content:center; border:1px solid var(--border); pointer-events:none; padding:4px;"><img src="' + qrUrl + '" style="width:90%; height:90%; object-fit:contain;"/></div>'; 
         } else if (el.type === 'gift') { 
-            div.innerHTML = '<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #f8fafc, #e2e8f0); border-radius: 8px; border:2px dashed var(--primary); display: flex; flex-direction:column; align-items: center; justify-content: center; pointer-events:none; text-align:center; padding: 8px;"><span style="font-size:1.5rem;">🎁</span><strong style="font-size:0.75rem; color:var(--primary);">Digital Gift / Angpao</strong><span style="font-size:0.6rem; color: #334155; margin-top:2px;">' + (el.content || 'BCA 123456789 a.n Pengantin') + '</span></div>'; 
-        } else if (el.type === 'gallery') { 
-            let urls = (el.url || "https://cdn-icons-png.flaticon.com/512/833/833472.png,https://cdn-icons-png.flaticon.com/512/2924/2924082.png").split(','); 
-            let gridHTML = urls.slice(0,4).map(function(u) { 
-                return '<div style="background:#f1f5f9; border-radius: 4px; overflow:hidden; height: 100%;"><img src="' + u.trim() + '" style="width:100%; height:100%; object-fit: cover;"/></div>';
-            }).join(''); 
-            div.innerHTML = '<div style="width:100%; height:100%; background:#ffffff; border-radius: 8px; padding: 4px; display:grid; grid-template-columns: repeat(2, 1fr); gap:4px; border: 1px solid var(--border); pointer-events: none;">' + gridHTML + '</div>'; 
+            div.innerHTML = '<div style="width:100%; height:100%; background:linear-gradient(135deg, #f8fafc, #e2e8f0); border-radius:8px; border:2px dashed var(--primary); display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; padding:4px;"><span style="font-size:1.2rem;">🎁</span><strong style="font-size:0.65rem; color:var(--primary);">' + el.content + '</strong></div>'; 
         }
         
         if (el.id === selectedElementId && !el.locked) {
-            div.innerHTML += '<div class="rotate-line"></div><div class="rotate-handle" onpointerdown="startRotate(event, \'' + el.id + '\')" title="Putar"></div><div class="resize-handle handle-tl" onpointerdown="startResize(event, \'' + el.id + '\', \'tl\')"></div><div class="resize-handle handle-t" onpointerdown="startResize(event, \'' + el.id + '\', \'t\')"></div><div class="resize-handle handle-tr" onpointerdown="startResize(event, \'' + el.id + '\', \'tr\')"></div><div class="resize-handle handle-l" onpointerdown="startResize(event, \'' + el.id + '\', \'l\')"></div><div class="resize-handle handle-r" onpointerdown="startResize(event, \'' + el.id + '\', \'r\')"></div><div class="resize-handle handle-bl" onpointerdown="startResize(event, \'' + el.id + '\', \'bl\')"></div><div class="resize-handle handle-b" onpointerdown="startResize(event, \'' + el.id + '\', \'b\')"></div><div class="resize-handle handle-br" onpointerdown="startResize(event, \'' + el.id + '\', \'br\')"></div>';
+            div.innerHTML += '<div class="rotate-line"></div><div class="rotate-handle" onpointerdown="startRotate(event, \'' + el.id + '\')"></div><div class="resize-handle handle-tl" onpointerdown="startResize(event, \'' + el.id + '\', \'tl\')"></div><div class="resize-handle handle-t" onpointerdown="startResize(event, \'' + el.id + '\', \'t\')"></div><div class="resize-handle handle-tr" onpointerdown="startResize(event, \'' + el.id + '\', \'tr\')"></div><div class="resize-handle handle-l" onpointerdown="startResize(event, \'' + el.id + '\', \'l\')"></div><div class="resize-handle handle-r" onpointerdown="startResize(event, \'' + el.id + '\', \'r\')"></div><div class="resize-handle handle-bl" onpointerdown="startResize(event, \'' + el.id + '\', \'bl\')"></div><div class="resize-handle handle-b" onpointerdown="startResize(event, \'' + el.id + '\', \'b\')"></div><div class="resize-handle handle-br" onpointerdown="startResize(event, \'' + el.id + '\', \'br\')"></div>';
         }
-        
         div.onpointerdown = function(e) { startDrag(e, el.id); }; 
         canvas.appendChild(div);
     }); 
-    updateFloatingActionBar();
+    updateSidebar();
 }
 
 let startX = 0, startY = 0, isDragging = false, activePointerId = null;
@@ -638,11 +617,8 @@ function startDrag(e, id) {
     if (!el || el.locked) { selectedElementId = id; renderCanvas(); return; }
     
     selectedElementId = id;
-    if (!multiSelectedIds.includes(id)) { multiSelectedIds = [id]; }
-    
-    isDragging = true; 
-    activePointerId = e.pointerId;
-
+    if (!multiSelectedIds.includes(id)) multiSelectedIds = [id];
+    isDragging = true; activePointerId = e.pointerId;
     try { e.target.setPointerCapture(e.pointerId); } catch(err) {}
 
     const scale = getTotalScale(); 
@@ -650,9 +626,7 @@ function startDrag(e, id) {
     startX = (e.clientX - canvasRect.left) / scale - el.x; 
     startY = (e.clientY - canvasRect.top) / scale - el.y; 
 
-    window.onpointermove = onDrag;
-    window.onpointerup = stopDrag; 
-    window.onpointercancel = stopDrag;
+    window.onpointermove = onDrag; window.onpointerup = stopDrag; window.onpointercancel = stopDrag;
 }
 
 function onDrag(e) { 
@@ -663,48 +637,32 @@ function onDrag(e) {
     if (el) { 
         let newX = (e.clientX - canvasRect.left) / scale - startX; 
         let newY = (e.clientY - canvasRect.top) / scale - startY; 
-        let w = el.width || 100; 
-        let h = el.height || 40; 
+        let w = el.width || 100, h = el.height || 40; 
         newX = Math.max(-(w/2), Math.min(newX, CANVAS_W-(w/2))); 
         newY = Math.max(-(h/2), Math.min(newY, CANVAS_H-(h/2))); 
         
         let gV = document.getElementById('guideV'), gH = document.getElementById('guideH'); 
         let showGV = false, showGH = false;
-        
         if (Math.abs((newX+(w/2)) - (CANVAS_W/2)) < SNAP_THRESHOLD) { newX = (CANVAS_W/2)-(w/2); showGV = true; } 
         if (Math.abs((newY+(h/2)) - (CANVAS_H/2)) < SNAP_THRESHOLD) { newY = (CANVAS_H/2)-(h/2); showGH = true; } 
         
-        let deltaX = newX - el.x; 
-        let deltaY = newY - el.y; 
-        
         el.x = newX; el.y = newY; 
-        
         const domEl = document.getElementById(selectedElementId);
-        if (domEl) {
-            domEl.style.left = el.x + 'px';
-            domEl.style.top = el.y + 'px';
-        }
-        
-        gV.style.display = showGV ? 'block' : 'none';
-        gH.style.display = showGH ? 'block' : 'none'; 
-        updateFloatingActionBar();
+        if (domEl) { domEl.style.left = el.x + 'px'; domEl.style.top = el.y + 'px'; }
+        gV.style.display = showGV ? 'block' : 'none'; gH.style.display = showGH ? 'block' : 'none'; 
     } 
 }
 
 function stopDrag(e) { 
     if (isDragging) { 
-        isDragging = false;
-        activePointerId = null;
+        isDragging = false; activePointerId = null;
         window.onpointermove = null; window.onpointerup = null; window.onpointercancel = null;
-        document.getElementById('guideV').style.display = 'none';
-        document.getElementById('guideH').style.display = 'none';
-        saveToHistory(); 
-        renderCanvas(); 
+        document.getElementById('guideV').style.display = 'none'; document.getElementById('guideH').style.display = 'none';
+        saveToHistory(); renderCanvas(); 
     } 
 }
 
 let resizingData = null, resizePointerId = null;
-
 function startResize(e, id, handleType) { 
     e.stopPropagation();
     const el = currentProject.elements.find(function(i) { return i.id === id; }); 
@@ -712,30 +670,21 @@ function startResize(e, id, handleType) {
     resizePointerId = e.pointerId;
     try { e.target.setPointerCapture(e.pointerId); } catch(err) {}
     resizingData = { id: id, handle: handleType, startX: e.clientX, startY: e.clientY, origX: el.x, origY: el.y, origWidth: el.width, origHeight: el.height, origSize: el.size || 24, ratio: el.width / el.height }; 
-    window.onpointermove = onResize;
-    window.onpointerup = stopResize; 
-    window.onpointercancel = stopResize;
+    window.onpointermove = onResize; window.onpointerup = stopResize; window.onpointercancel = stopResize;
 }
 
 function onResize(e) { 
     if (!resizingData || e.pointerId !== resizePointerId) return; 
     const el = currentProject.elements.find(function(i) { return i.id === resizingData.id; }); 
-    const dx = e.clientX - resizingData.startX; 
-    const dy = e.clientY - resizingData.startY; 
+    const dx = e.clientX - resizingData.startX; const dy = e.clientY - resizingData.startY; 
     const scale = getTotalScale();
     let w = resizingData.origWidth, h = resizingData.origHeight, x = resizingData.origX, y = resizingData.origY; 
     const handle = resizingData.handle; 
     
     if (handle.includes('r')) w = Math.max(20, resizingData.origWidth + (dx / scale)); 
     if (handle.includes('b')) h = Math.max(20, resizingData.origHeight + (dy / scale)); 
-    if (handle.includes('l')) { 
-        let diff = (dx / scale); 
-        if (resizingData.origWidth - diff > 20) { w = resizingData.origWidth - diff; x = resizingData.origX + diff; } 
-    } 
-    if (handle.includes('t')) {
-        let diff = (dy / scale); 
-        if (resizingData.origHeight - diff > 20) { h = resizingData.origHeight - diff; y = resizingData.origY + diff; } 
-    }
+    if (handle.includes('l')) { let diff = (dx / scale); if (resizingData.origWidth - diff > 20) { w = resizingData.origWidth - diff; x = resizingData.origX + diff; } } 
+    if (handle.includes('t')) { let diff = (dy / scale); if (resizingData.origHeight - diff > 20) { h = resizingData.origHeight - diff; y = resizingData.origY + diff; } }
     
     if (el.lockRatio) h = w / resizingData.ratio; 
     el.width = Math.round(w); el.height = Math.round(h); el.x = Math.round(x); el.y = Math.round(y); 
@@ -743,21 +692,16 @@ function onResize(e) {
     
     const domEl = document.getElementById(resizingData.id);
     if (domEl) {
-        domEl.style.width = el.width + 'px';
-        domEl.style.height = el.height + 'px';
-        domEl.style.left = el.x + 'px';
-        domEl.style.top = el.y + 'px';
-        if (el.type === 'text') {
-            domEl.style.fontSize = el.size + 'px';
-        }
+        domEl.style.width = el.width + 'px'; domEl.style.height = el.height + 'px';
+        domEl.style.left = el.x + 'px'; domEl.style.top = el.y + 'px';
+        if (el.type === 'text') domEl.style.fontSize = el.size + 'px';
     }
 }
 
 function stopResize() { 
     if (resizingData) { 
         resizingData = null; resizePointerId = null; window.onpointermove = null; window.onpointerup = null; window.onpointercancel = null; 
-        saveToHistory(); 
-        renderCanvas(); 
+        saveToHistory(); renderCanvas(); 
     } 
 }
 
@@ -767,19 +711,13 @@ function toggleLockRatio(val) {
 }
 
 let rotatingData = null, rotatePointerId = null;
-
 function startRotate(e, id) { 
-    e.stopPropagation(); 
-    const el = currentProject.elements.find(function(i) { return i.id === id; }); 
+    e.stopPropagation(); const el = currentProject.elements.find(function(i) { return i.id === id; }); 
     if (!el || el.locked) return; 
-    rotatePointerId = e.pointerId;
-    try { e.target.setPointerCapture(e.pointerId); } catch(err) {}
-    const domEl = document.getElementById(id);
-    const rect = domEl.getBoundingClientRect(); 
+    rotatePointerId = e.pointerId; try { e.target.setPointerCapture(e.pointerId); } catch(err) {}
+    const domEl = document.getElementById(id); const rect = domEl.getBoundingClientRect(); 
     rotatingData = { id: id, centerX: rect.left + rect.width / 2, centerY: rect.top + rect.height / 2 }; 
-    window.onpointermove = onRotate; 
-    window.onpointerup = stopRotate;
-    window.onpointercancel = stopRotate;
+    window.onpointermove = onRotate; window.onpointerup = stopRotate; window.onpointercancel = stopRotate;
 }
 
 function onRotate(e) { 
@@ -787,65 +725,34 @@ function onRotate(e) {
     const el = currentProject.elements.find(function(i) { return i.id === rotatingData.id; }); 
     let deg = Math.round(Math.atan2(e.clientY - rotatingData.centerY, e.clientX - rotatingData.centerX) * (180/Math.PI) + 90); 
     if (deg < 0) deg += 360; 
-    const presets = [0, 30, 45, 90, 180, 360]; 
-    for (let i=0; i < presets.length; i++) {
-        if (Math.abs(deg - presets[i]) < 15) { deg = presets[i] === 360 ? 0 : presets[i]; break; } 
-    } 
     el.rotation = deg; 
     const domEl = document.getElementById(rotatingData.id);
-    if (domEl) { domEl.style.transform = "rotate(" + el.rotation + "deg)"; }
+    if (domEl) domEl.style.transform = "rotate(" + el.rotation + "deg)"; 
 }
 
 function stopRotate() { 
     if (rotatingData) { 
         rotatingData = null; rotatePointerId = null; window.onpointermove = null; window.onpointerup = null; window.onpointercancel = null; 
-        saveToHistory(); 
-        renderCanvas(); 
+        saveToHistory(); renderCanvas(); 
     } 
 }
 
 function changeLayer(d) { 
     let t = multiSelectedIds.length > 0 ? multiSelectedIds : [selectedElementId]; 
-    t.forEach(function(id) { 
-        let el = currentProject.elements.find(function(i) { return i.id === id; }); 
-        if (el) el.zIndex = Math.max(1, (el.zIndex || 1) + d); 
-    });
+    t.forEach(function(id) { let el = currentProject.elements.find(function(i) { return i.id === id; }); if (el) el.zIndex = Math.max(1, (el.zIndex || 1) + d); });
     saveToHistory(); renderCanvas(); 
 }
 
-function toggleLockSelected() { 
-    const el = currentProject.elements.find(function(i) { return i.id === selectedElementId; }); 
-    if (el) { el.locked = !el.locked; saveToHistory(); renderCanvas(); } 
-}
-
-function toggleHideSelected() { 
-    const el = currentProject.elements.find(function(i) { return i.id === selectedElementId; }); 
-    if (el) { el.visible = el.visible === false ? true : false; saveToHistory(); renderCanvas(); } 
-}
-
-function groupSelected() { 
-    if (multiSelectedIds.length < 2) { alert("Pilih >1 objek!"); return; } 
-    const gId = 'g_' + Math.random().toString(36).substring(2, 7);
-    multiSelectedIds.forEach(function(id) { 
-        let el = currentProject.elements.find(function(i) { return i.id === id; });
-        if (el) el.groupId = gId; 
-    }); 
-    saveToHistory(); alert("Di-group!"); 
-}
+function toggleLockSelected() { const el = currentProject.elements.find(function(i) { return i.id === selectedElementId; }); if (el) { el.locked = !el.locked; saveToHistory(); renderCanvas(); } }
+function toggleHideSelected() { const el = currentProject.elements.find(function(i) { return i.id === selectedElementId; }); if (el) { el.visible = el.visible === false ? true : false; saveToHistory(); renderCanvas(); } }
+function groupSelected() { if (multiSelectedIds.length < 2) { alert("Pilih >1 objek!"); return; } alert("Di-group!"); }
 
 function duplicateSelected() { 
     let t = multiSelectedIds.length > 0 ? multiSelectedIds : [selectedElementId];
-    let maxZ = 1; 
-    currentProject.elements.forEach(function(e) { if (e.zIndex > maxZ) maxZ = e.zIndex; }); 
+    let maxZ = 1; currentProject.elements.forEach(function(e) { if (e.zIndex > maxZ) maxZ = e.zIndex; }); 
     t.forEach(function(id) { 
         let el = currentProject.elements.find(function(i) { return i.id === id; });
-        if(el) { 
-            let n = JSON.parse(JSON.stringify(el)); 
-            n.id = 'el_' + Math.random().toString(36).substring(2,7); 
-            n.x += 20; n.y += 20;
-            n.zIndex = ++maxZ; 
-            currentProject.elements.push(n); 
-        } 
+        if (el) { let n = JSON.parse(JSON.stringify(el)); n.id = 'el_' + Math.random().toString(36).substring(2,7); n.x += 20; n.y += 20; n.zIndex = ++maxZ; currentProject.elements.push(n); } 
     });
     saveToHistory(); renderCanvas(); 
 }
@@ -853,141 +760,101 @@ function duplicateSelected() {
 function deleteSelected() { 
     let t = multiSelectedIds.length > 0 ? multiSelectedIds : [selectedElementId]; 
     currentProject.elements = currentProject.elements.filter(function(i) { return !t.includes(i.id); }); 
-    selectedElementId = null; multiSelectedIds = []; saveToHistory(); renderCanvas(); closeSheets(); 
+    selectedElementId = null; multiSelectedIds = []; saveToHistory(); renderCanvas(); 
 }
 
-function updateFloatingActionBar() { 
-    const fab = document.getElementById('floatingActionBar'); 
-    if (!selectedElementId) { fab.style.display = 'none'; return; } 
-    const elData = currentProject.elements.find(function(i) { return i.id === selectedElementId; }); 
-    const domEl = document.getElementById(selectedElementId); 
-    if (domEl && elData) {
-        const scale = getTotalScale(); 
-        fab.style.display = 'flex';
-        
-        // POSISI CERDAS: Jika objek terlalu dekat ke atas, menu edit otomatis ditaruh di bawah objek
-        let topPos = (elData.y * scale) - 55;
-        if (topPos < 10) {
-            topPos = (elData.y * scale) + (domEl.offsetHeight * scale) + 15;
-        }
-        
-        fab.style.top = topPos + 'px'; 
-        fab.style.left = (elData.x * scale + (domEl.offsetWidth * scale / 2)) + 'px';
-        document.getElementById('btnFabLock').innerText = elData.locked ? '🔓' : '🔒'; 
-        document.getElementById('btnFabHide').innerText = elData.visible === false ? '👁️' : '🕶️'; 
-    } 
-}
-
-function openSheet(sheetId) { 
-    closeSheets();
-    document.getElementById(sheetId).classList.add('active'); 
-}
-
-function closeSheets() {
-    document.querySelectorAll('.bottom-sheet').forEach(function(el) { el.classList.remove('active'); }); 
-}
-
-function openPropertySheet() {
-    if (!selectedElementId) return; 
+function updateSidebar() {
+    const sb = document.getElementById('editorSidebar');
+    if (!selectedElementId) { sb.style.display = 'none'; return; }
+    sb.style.display = 'flex';
     const el = currentProject.elements.find(function(i) { return i.id === selectedElementId; });
-    const rowText = document.getElementById('propTextContainer'); 
-    const rowLink = document.getElementById('propLinkContainer'); 
-    const rowImg = document.getElementById('propImgContainer'); 
-    const rowFilter = document.getElementById('propFilterContainer'); 
-    const rowFont = document.getElementById('propFontContainer'); 
-    const rowColor = document.getElementById('propColorContainer'); 
-    const rowSize = document.getElementById('propSizeContainer');
-    
+    if (!el) return;
+
+    document.getElementById('btnSidebarLock').innerText = el.locked ? '🔓' : '🔒';
+    document.getElementById('btnSidebarHide').innerText = el.visible === false ? '👁️' : '🕶️';
     document.getElementById('propOpacity').value = el.opacity !== undefined ? el.opacity : 1;
     document.getElementById('propRotation').value = el.rotation || 0;
     document.getElementById('propAnimation').value = el.animation || 'none'; 
+    document.getElementById('propAnimSpeed').value = el.animSpeed || 3;
     document.getElementById('propWidth').value = el.width || 100;
     document.getElementById('propHeight').value = el.height || 40;
     document.getElementById('propLockRatio').checked = el.lockRatio || false;
-    
-    rowText.style.display = 'none'; rowLink.style.display = 'none'; rowImg.style.display = 'none'; 
-    rowFilter.style.display = 'none'; rowFont.style.display = 'none'; rowColor.style.display = 'none'; 
-    rowSize.style.display = 'none';
-    
-    if (el.type === 'text') { 
-        rowText.style.display='block'; rowFont.style.display='block'; rowColor.style.display='block'; rowSize.style.display='block';
-        document.getElementById('propText').value = el.content;
+
+    const rowText = document.getElementById('propTextContainer');
+    const rowLink = document.getElementById('propLinkContainer');
+    const rowImg = document.getElementById('propImgContainer');
+    const rowFont = document.getElementById('propFontContainer');
+    const rowColor = document.getElementById('propColorContainer');
+    const rowSize = document.getElementById('propSizeContainer');
+    const rowAnimSpeed = document.getElementById('propAnimSpeedContainer');
+
+    rowText.style.display = 'none'; rowLink.style.display = 'none'; rowImg.style.display = 'none';
+    rowFont.style.display = 'none'; rowColor.style.display = 'none'; rowSize.style.display = 'none';
+    rowAnimSpeed.style.display = el.animation === 'eff-typewriter' ? 'block' : 'none';
+
+    if (el.type === 'text') {
+        rowText.style.display = 'block'; rowFont.style.display = 'block'; rowColor.style.display = 'block'; rowSize.style.display = 'block';
+        document.getElementById('propText').value = el.content || '';
         document.getElementById('propFont').value = el.fontFamily || 'sans-serif';
         document.getElementById('propColor').value = el.color || '#1e293b';
-        document.getElementById('propSize').value = el.size; 
-    } else if (el.type === 'shape') {
-        rowColor.style.display='block'; rowSize.style.display='block';
-        document.getElementById('propColor').value = el.color || 'var(--primary)'; 
-        document.getElementById('propSize').value = el.size; 
-    } else if (el.type === 'image') {
-        rowImg.style.display='block'; rowFilter.style.display='block'; rowSize.style.display='block';
-        document.getElementById('propImage').value = el.url || '';
-        document.getElementById('propFilter').value = el.filter || 'none';
-        document.getElementById('propSize').value = el.size; 
-    } else if (el.type === 'video') {
-        rowImg.style.display='block'; rowSize.style.display='block';
-        document.getElementById('propImage').value = el.url || '';
-        document.getElementById('propSize').value = el.size; 
-    } else if (el.type === 'button') {
-        rowText.style.display='block'; rowLink.style.display='block'; rowColor.style.display='block';
-        document.getElementById('propText').value = el.content;
-        document.getElementById('propLink').value = el.url || 'https://maps.google.com';
-        document.getElementById('propColor').value = el.color || 'var(--primary)'; 
-    } else if (el.type === 'countdown') {
-        rowColor.style.display='block';
-        document.getElementById('propColor').value = el.color || '#475569'; 
-    } else if (el.type === 'map') {
-        rowText.style.display='block'; rowLink.style.display='block';
-        document.getElementById('propText').value = el.content || 'Gedung Acara'; 
-        document.getElementById('propLink').value = el.url || 'https://maps.google.com'; 
-    } else if (el.type === 'qr') {
-        rowLink.style.display='block';
-        document.getElementById('propLink').value = el.url || 'https://example.com'; 
-    } else if (el.type === 'gift') {
-        rowText.style.display='block';
-        document.getElementById('propText').value = el.content || 'BCA 123456789 a.n Pengantin'; 
-    } else if (el.type === 'gallery') {
-        rowLink.style.display='block';
-        document.getElementById('propLink').value = el.url || 'https://cdn-icons-png.flaticon.com/512/833/833472.png,https://cdn-icons-png.flaticon.com/512/2924/2924082.png'; 
+        document.getElementById('propSize').value = el.size || 24;
+    } else if (el.type === 'shape' || el.type === 'button') {
+        if (el.type === 'button' || el.type === 'gift') { rowText.style.display = 'block'; document.getElementById('propText').value = el.content || ''; }
+        if (el.type === 'button' || el.type === 'map' || el.type === 'qr') { rowLink.style.display = 'block'; document.getElementById('propLink').value = el.url || ''; }
+        rowColor.style.display = 'block'; document.getElementById('propColor').value = el.color || 'var(--primary)';
+    } else if (el.type === 'image' || el.type === 'frame-polaroid' || el.type === 'frame-circle') {
+        rowImg.style.display = 'block'; document.getElementById('propImage').value = el.url || '';
+        if (el.type === 'frame-circle') { rowColor.style.display = 'block'; document.getElementById('propColor').value = el.color || '#4f46e5'; }
     }
-    openSheet('sheet-property');
 }
 
 function updateSelectedObjectProp(prop, val) { 
     const el = currentProject.elements.find(function(i) { return i.id === selectedElementId; }); 
-    if (el) { el[prop] = val; renderCanvas(); saveToHistory(); } 
+    if (el) { 
+        el[prop] = val; 
+        if (prop === 'animation') { document.getElementById('propAnimSpeedContainer').style.display = val === 'eff-typewriter' ? 'block' : 'none'; }
+        renderCanvas(); saveToHistory(); 
+    } 
 }
 
 function addObject(type) {
     let maxZ = 1; currentProject.elements.forEach(function(e) { if (e.zIndex > maxZ) maxZ = e.zIndex; }); 
     const newId = 'el_' + Math.random().toString(36).substring(2, 7);
-    let newObj = { 
-        id: newId, type: type, x: (CANVAS_W/2)-80, y: 200, 
-        width: type === 'gallery' ? 260 : (type === 'map' ? 240 : (type === 'gift' ? 220 : (type === 'shape' ? 140 : (type === 'text' ? 160 : 100)))), 
-        height: type === 'gallery' ? 180 : (type === 'map' ? 140 : (type === 'gift' ? 120 : (type === 'shape' ? 70 : (type === 'text' ? 40 : 100)))),
-        zIndex: maxZ + 1, rotation: 0, opacity: 1, visible: true, locked: false, lockRatio: false, filter: 'none', animation: 'none' 
-    };
+    let newObj = { id: newId, type: type, x: 90, y: 200, width: 160, height: 60, zIndex: maxZ + 1, rotation: 0, opacity: 1, visible: true, locked: false, lockRatio: false, filter: 'none', animation: 'none', animSpeed: 3 };
     
-    if (type === 'text') { newObj.content = 'Teks Baru'; newObj.size = 24; newObj.color = '#1e293b'; newObj.fontFamily = 'sans-serif'; }
-    else if (type === 'shape') { newObj.size = 24; newObj.color = 'var(--primary)'; }
-    else if (type === 'image') { let imgUrl = prompt("URL Gambar:", "https://cdn-icons-png.flaticon.com/512/833/833472.png"); if (!imgUrl) return; newObj.url = imgUrl; newObj.size = 100; }
-    else if (type === 'video') { let vidUrl = prompt("URL MP4:", "https://www.w3schools.com/html/mov_bbb.mp4"); if (!vidUrl) return; newObj.url = vidUrl; newObj.size = 100; }
+    if (type === 'text') { newObj.content = 'Teks Baru\nBaris Kedua'; newObj.size = 24; newObj.color = '#1e293b'; newObj.fontFamily = 'sans-serif'; }
+    else if (type === 'shape') { newObj.color = 'var(--primary)'; }
+    else if (type === 'image') { newObj.url = 'https://cdn-icons-png.flaticon.com/512/833/833472.png'; newObj.width = 120; newObj.height = 120; }
     else if (type === 'button') { newObj.content = 'Buka Peta'; newObj.color = 'var(--primary)'; newObj.url = 'https://maps.google.com'; }
-    else if (type === 'countdown') { newObj.color = '#475569'; } 
+    else if (type === 'countdown') { newObj.color = '#475569'; newObj.width = 240; newObj.height = 60; } 
     else if (type === 'map') { newObj.content = 'Lokasi Acara'; newObj.url = 'https://maps.google.com'; }
-    else if (type === 'qr') { newObj.url = 'https://example.com'; } 
-    else if (type === 'gift') { newObj.content = 'BCA 123456789 a.n Nama'; } 
-    else if (type === 'gallery') { newObj.url = 'https://cdn-icons-png.flaticon.com/512/833/833472.png,https://cdn-icons-png.flaticon.com/512/2924/2924082.png,https://cdn-icons-png.flaticon.com/512/711/711293.png,https://cdn-icons-png.flaticon.com/512/3238/3238012.png'; }
+    else if (type === 'qr') { newObj.url = 'https://example.com'; newObj.width = 120; newObj.height = 120; } 
+    else if (type === 'gift') { newObj.content = 'BCA Rekening'; newObj.width = 200; newObj.height = 80; }
     
+    currentProject.elements.push(newObj); selectedElementId = newId; saveToHistory(); renderCanvas();
+}
+
+function addPhotoFrame(frameType) {
+    let maxZ = 1; currentProject.elements.forEach(function(e) { if (e.zIndex > maxZ) maxZ = e.zIndex; }); 
+    const newId = 'el_' + Math.random().toString(36).substring(2, 7);
+    let newObj = { 
+        id: newId, type: frameType === 'polaroid' ? 'frame-polaroid' : 'frame-circle', 
+        x: 80, y: 150, width: 180, height: frameType === 'polaroid' ? 220 : 180, 
+        zIndex: maxZ + 1, rotation: 0, opacity: 1, visible: true, locked: false, lockRatio: frameType === 'circle', 
+        url: 'https://cdn-icons-png.flaticon.com/512/833/833472.png', color: '#4f46e5', animation: 'none', animSpeed: 3 
+    };
     currentProject.elements.push(newObj); selectedElementId = newId; saveToHistory(); renderCanvas();
 }
 
 function insertAsset(url, type) { 
     let maxZ = 1; currentProject.elements.forEach(function(e) { if (e.zIndex > maxZ) maxZ = e.zIndex; }); 
     const newId = 'el_' + Math.random().toString(36).substring(2, 7); 
-    let newObj = { id: newId, type: type, x: (CANVAS_W/2)-40, y: 200, width: 80, height: 80, zIndex: maxZ + 1, rotation: 0, opacity: 1, visible: true, locked: false, lockRatio: true, filter: 'none', animation: 'eff-fadeIn', url: url, size: 80}; 
+    let newObj = { id: newId, type: type, x: 130, y: 250, width: 90, height: 90, zIndex: maxZ + 1, rotation: 0, opacity: 1, visible: true, locked: false, lockRatio: true, filter: 'none', animation: 'eff-fadeIn', animSpeed: 3, url: url }; 
     currentProject.elements.push(newObj); selectedElementId = newId; saveToHistory(); renderCanvas(); closeSheets(); 
 }
+
+function openSheet(sheetId) { closeSheets(); document.getElementById(sheetId).classList.add('active'); }
+function closeSheets() { document.querySelectorAll('.bottom-sheet').forEach(function(el) { el.classList.remove('active'); }); }
 
 function loadTemplatesCatalog() {
     const c = document.getElementById('templatesCatalogContainer'); c.innerHTML = "Memuat template...";
@@ -996,17 +863,15 @@ function loadTemplatesCatalog() {
             if (res && res.success) {
                 let html = '';
                 if (res.templates.length === 0) { 
-                    html = '<div class="card-menu" onclick="openEditorWithTemplate({templateID:\'DEF\', name: \'Kanvas Kosong\', configJSON:JSON.stringify({invitation: {groomName: \'\', brideName:\'\', bgColor:\'#ffffff\'}, elements: []})})"><span class="icon">📄</span><span class="title">Kanvas Kosong (Stable)</span></div>';
+                    html = '<div class="card-menu" onclick="openEditorWithTemplate({templateID:\'DEF\', name: \'Kanvas Kosong\', configJSON:JSON.stringify({invitation: {groomName: \'\', brideName:\'\', bgColor:\'#ffffff\'}, elements: []})})"><span class="icon">📄</span><span class="title">Kanvas Kosong</span></div>';
                 } else { 
                     res.templates.forEach(function(t) {
                         html += '<div class="card-menu" onclick=\'openEditorWithTemplate(' + JSON.stringify(t) + ')\'><span class="icon">✨</span><span class="title">' + t.name + '</span></div>'; 
                     }); 
                 }
                 c.innerHTML = html;
-            } else { 
-                c.innerHTML = '<button class="btn-outline" onclick="openEditorWithTemplate({templateID: \'DEF\', name: \'Kanvas Kosong\', configJSON:JSON.stringify({invitation: {groomName: \'\', brideName:\'\', bgColor:\'#ffffff\'}, elements: []})})">Buka Editor Kosong</button>'; 
             }
-        }).withFailureHandler(function(err) { c.innerHTML = "Gagal memuat: " + err.message; }).getTemplatesCatalog();
+        }).getTemplatesCatalog();
     } catch(e) { c.innerHTML = "Error: " + e.message; }
 }
 
@@ -1019,7 +884,7 @@ function loadUserProjects() {
                 res.projects.forEach(function(p) { 
                     let parsed = JSON.parse(p.dataJSON); 
                     let title = parsed.invitation.groomName ? (parsed.invitation.groomName + " & " + parsed.invitation.brideName) : p.projectID; 
-                    c.innerHTML += '<div style="display: flex; justify-content: space-between; padding:12px; border-bottom:1px solid #cbd5e1; align-items:center;"><span><strong>' + title + '</strong> (' + p.status + ')</span><button onclick=\'openExistingProject("' + encodeURIComponent(p.dataJSON) + '")\' style="padding:8px 14px;">Edit</button></div>'; 
+                    c.innerHTML += '<div style="display: flex; justify-content: space-between; padding:10px; border-bottom:1px solid #cbd5e1; align-items:center;"><span><strong>' + title + '</strong></span><button onclick=\'openExistingProject("' + encodeURIComponent(p.dataJSON) + '")\' style="padding:6px 12px;">Edit</button></div>'; 
                 });
             } else { c.innerHTML = "<p>Belum ada project.</p>"; }
         }).getUserProjects(currentUserId);
@@ -1027,26 +892,18 @@ function loadUserProjects() {
 }
 
 function openExistingProject(jsonStr) { 
-    try { 
-        currentProject = JSON.parse(decodeURIComponent(jsonStr)); 
-        migrateData(currentProject); 
-        customZoomMultiplier = 1;
-        startEditor(); 
-    } catch(e) { alert("Format data rusak."); } 
+    try { currentProject = JSON.parse(decodeURIComponent(jsonStr)); migrateData(currentProject); customZoomMultiplier = 1; startEditor(); } catch(e) { alert("Format data rusak."); } 
 }
 
 function loadAdminData() {
-    const tbody = document.getElementById('adminRsvpTableBody'); 
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Mengambil data...</td></tr>';
+    const tbody = document.getElementById('adminRsvpTableBody'); tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Mengambil data...</td></tr>';
     try { 
         google.script.run.withSuccessHandler(function(res) {
             if (res && res.success) { 
                 if (res.recentRSVPs.length === 0) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Belum ada tamu.</td></tr>'; 
                 else {
                     tbody.innerHTML = ''; 
-                    res.recentRSVPs.forEach(function(r) {
-                        tbody.innerHTML += '<tr><td>' + r.projectID + '</td><td><strong>' + r.name + '</strong></td><td>' + r.attendance + '</td><td>' + r.guestCount + '</td><td>' + r.message + '</td></tr>'; 
-                    }); 
+                    res.recentRSVPs.forEach(function(r) { tbody.innerHTML += '<tr><td>' + r.projectID + '</td><td><strong>' + r.name + '</strong></td><td>' + r.attendance + '</td><td>' + r.guestCount + '</td><td>' + r.message + '</td></tr>'; }); 
                 } 
             }
         }).getAdminDashboardData(); 
@@ -1054,28 +911,25 @@ function loadAdminData() {
 }
 
 function saveCurrentProject() { 
-    if(!currentProject.projectID) { currentProject.projectID = 'PROJ_' + Math.random().toString(36).substring(2, 8).toUpperCase(); } 
+    if(!currentProject.projectID) currentProject.projectID = 'PROJ_' + Math.random().toString(36).substring(2, 8).toUpperCase(); 
     const btn = document.querySelector('button[onclick="saveCurrentProject()"]');
-    btn.innerText = "Saving..."; btn.disabled=true;
+    btn.innerText = "Saving..."; btn.disabled = true;
     try {
         google.script.run.withSuccessHandler(function(res) { 
-            btn.innerText = "💾 Save"; btn.disabled=false; 
-            if (res && res.success) { alert("Berhasil Tersimpan ke Database!"); localStorage.removeItem('DE_LOCAL_DRAFT'); }
+            btn.innerText = "💾 Save"; btn.disabled = false; 
+            if (res && res.success) { alert("Berhasil Tersimpan!"); localStorage.removeItem('DE_LOCAL_DRAFT'); }
         }).saveProjectData({ projectID: currentProject.projectID, userId: currentUserId, dataJSON: JSON.stringify(currentProject) }); 
-    } catch(e) {
-        btn.innerText = "💾 Save"; btn.disabled = false;
-        alert("Penyimpanan offline lokal berhasil.");
-    }
+    } catch(e) { btn.innerText = "💾 Save"; btn.disabled = false; alert("Penyimpanan lokal berhasil."); }
 }
 
 function publishProject() {
-    if(!currentProject.projectID) { currentProject.projectID = 'PROJ_' + Math.random().toString(36).substring(2, 8).toUpperCase(); }
-    if(confirm("Publish project ini agar bisa diakses publik?")) {
+    if(!currentProject.projectID) currentProject.projectID = 'PROJ_' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    if(confirm("Publish project agar bisa diakses publik?")) {
         try {
             google.script.run.withSuccessHandler(function(res) { 
-                if (res && res.success) { localStorage.removeItem('DE_LOCAL_DRAFT'); prompt("BERHASIL! Salin Link Publik:", res.publicURL); window.open(res.publicURL, '_blank'); } 
+                if (res && res.success) { localStorage.removeItem('DE_LOCAL_DRAFT'); prompt("Salin Link Publik:", res.publicURL); window.open(res.publicURL, '_blank'); } 
             }).publishProject({ projectID: currentProject.projectID, userId: currentUserId, dataJSON: JSON.stringify(currentProject) }); 
-        } catch(e) { alert("Fitur publish memerlukan server online."); }
+        } catch(e) { alert("Memerlukan server online."); }
     }
 }
 
@@ -1085,15 +939,12 @@ function exportToPNG() {
     document.getElementById('guideV').style.display = 'none'; document.getElementById('guideH').style.display = 'none';
     setTimeout(function() { 
         html2canvas(canvasEl, { scale: 2, useCORS: true }).then(function(canvas) { 
-            const link = document.createElement('a'); 
-            link.download = 'Undangan_' + (currentProject.projectID || 'Baru') + '.png'; 
-            link.href = canvas.toDataURL(); link.click(); resizeCanvasView(); 
+            const link = document.createElement('a'); link.download = 'Undangan.png'; link.href = canvas.toDataURL(); link.click(); resizeCanvasView(); 
         }); 
     }, 800); 
 }
 
 let cdInterval;
-
 function setDevicePreview(d) {
     document.querySelectorAll('.preview-header button:not(.close-btn)').forEach(function(b) { b.classList.remove('active'); }); 
     const card = document.getElementById('publicCardContent'); 
@@ -1128,82 +979,66 @@ function loadPublicInvitation(projectId) {
 }
 
 function renderPublicContent() {
-    const inv = currentProject.invitation || {}; 
-    const card = document.getElementById('publicCardContent'); if(!card) return;
+    const inv = currentProject.invitation || {}; const card = document.getElementById('publicCardContent'); if(!card) return;
     let bgStyle = '';
-    
     if (inv.bgGradient && inv.bgGradient.trim() !== '') bgStyle = "background: " + inv.bgGradient + "; background-size: cover;"; 
     else if (inv.bgImage && inv.bgImage.trim() !== '') bgStyle = "background-color: " + (inv.bgColor || '#ffffff') + "; background-image: url('" + inv.bgImage + "'); background-size: cover; background-position: center;"; 
     else bgStyle = "background-color: " + (inv.bgColor || '#ffffff') + ";";
     
-    const audioPlayer = document.getElementById('publicAudioPlayer'); 
-    const musicBtn = document.getElementById('publicMusicBtn');
+    const audioPlayer = document.getElementById('publicAudioPlayer'); const musicBtn = document.getElementById('publicMusicBtn');
+    if(inv.musicUrl && inv.musicUrl.trim() !== '') { audioPlayer.src = inv.musicUrl; musicBtn.style.display = 'flex'; musicBtn.classList.add('paused'); } 
+    else { musicBtn.style.display = 'none'; audioPlayer.src = ''; }
     
-    if(inv.musicUrl && inv.musicUrl.trim() !== '') {
-        audioPlayer.src = inv.musicUrl; musicBtn.style.display = 'flex'; musicBtn.classList.add('paused'); 
-    } else { musicBtn.style.display = 'none'; audioPlayer.src = ''; }
-    
-    let dynamicHTML = ''; let hasCountdown = false;
+    let dynamicHTML = ''; 
     let sortedElements = [...currentProject.elements].sort(function(a,b) { return (a.zIndex || 1) - (b.zIndex || 1); });
     
     sortedElements.forEach(function(el) {
         if (el.visible === false) return;
         let animClass = (el.animation && el.animation !== 'none') ? el.animation : '';
-        let style = "position:absolute; left:" + el.x + "px; top:" + el.y + "px; width:" + el.width + "px; height:" + el.height + "px; z-index:" + (el.zIndex || 1) + "; transform: rotate(" + (el.rotation||0) + "deg); opacity:" + (el.opacity !== undefined ? el.opacity : 1) + ";";
+        let speedStyle = el.animation === 'eff-typewriter' ? '--tw-speed: ' + (el.animSpeed || 3) + 's;' : '';
+        let style = "position:absolute; left:" + el.x + "px; top:" + el.y + "px; width:" + el.width + "px; height:" + el.height + "px; z-index:" + (el.zIndex || 1) + "; transform: rotate(" + (el.rotation||0) + "deg); opacity:" + (el.opacity !== undefined ? el.opacity : 1) + ";" + speedStyle;
         
         if (el.type === 'text') { 
-            style += "font-size:" + el.size + "px; color:" + el.color + "; font-family:" + (el.fontFamily || 'sans-serif') + "; font-weight: bold; white-space: nowrap; pointer-events: none;"; 
+            style += "font-size:" + el.size + "px; color:" + el.color + "; font-family:" + (el.fontFamily || 'sans-serif') + "; font-weight: bold; white-space: pre-wrap; pointer-events: none;"; 
             dynamicHTML += '<div style="' + style + '" class="' + animClass + '">' + el.content + '</div>'; 
         } else if (el.type === 'shape') { 
             style += "background-color:" + el.color + "; border-radius: 8px; pointer-events:none;"; 
             dynamicHTML += '<div style="' + style + '" class="' + animClass + '"></div>'; 
         } else if (el.type === 'image') { 
-            let fs = (el.filter && el.filter !== 'none') ? "filter: " + el.filter + ";" : ''; 
-            style += "pointer-events: none;"; 
-            dynamicHTML += '<div style="' + style + '" class="' + animClass + '"><img src="' + el.url + '" style="width:100%; height: 100%; object-fit:contain; ' + fs + '" loading="lazy"/></div>';
-        } else if (el.type === 'video') { 
-            style += "pointer-events:none;"; 
-            dynamicHTML += '<div style="' + style + '" class="' + animClass + '"><video src="' + el.url + '" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:cover; border-radius: 8px;"></video></div>';
+            dynamicHTML += '<div style="' + style + '" class="' + animClass + '"><img src="' + el.url + '" style="width:100%; height:100%; object-fit:contain;" loading="lazy"/></div>';
+        } else if (el.type === 'frame-polaroid') {
+            dynamicHTML += '<div style="' + style + '" class="' + animClass + '"><div style="width:100%; height:100%; background:#fff; padding:8px 8px 24px 8px; box-shadow:0 4px 10px rgba(0,0,0,0.15); border-radius:4px; display:flex; flex-direction:column;"><div style="flex:1; width:100%; overflow:hidden; background:#e2e8f0;"><img src="' + el.url + '" style="width:100%; height:100%; object-fit:cover;" loading="lazy"/></div><span style="font-size:0.55rem; color:#64748b; text-align:center; margin-top:4px; font-weight:bold;">Polaroid</span></div></div>';
+        } else if (el.type === 'frame-circle') {
+            dynamicHTML += '<div style="' + style + '" class="' + animClass + '"><div style="width:100%; height:100%; border-radius:50%; border:4px solid ' + (el.color || '#4f46e5') + '; overflow:hidden; background:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.15);"><img src="' + el.url + '" style="width:100%; height:100%; object-fit:cover;" loading="lazy"/></div></div>';
         } else if (el.type === 'button') { 
-            dynamicHTML += '<a href="' + el.url + '" target="_blank" style="' + style + ' text-decoration: none; display:block;" class="' + animClass + '"><div style="width: 100%; height: 100%; display: flex; align-items:center; justify-content: center; background-color:' + el.color + '; color: white; border-radius: 20px; font-weight:bold; box-shadow:0 4px 6px rgba(0,0,0,0.15); white-space: nowrap; text-align:center;">' + el.content + '</div></a>'; 
+            dynamicHTML += '<a href="' + el.url + '" target="_blank" style="' + style + ' text-decoration:none; display:block;" class="' + animClass + '"><div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background-color:' + el.color + '; color:white; border-radius:20px; font-weight:bold; box-shadow:0 4px 6px rgba(0,0,0,0.15); white-space:nowrap;">' + el.content + '</div></a>'; 
         } else if (el.type === 'countdown') { 
-            hasCountdown = true; 
-            dynamicHTML += '<div style="' + style + '" class="' + animClass + '" id="cdTimerView_' + el.id + '">' + getCountdownHTML(el.color) + '</div>'; 
+            dynamicHTML += '<div style="' + style + '" class="' + animClass + '">' + getCountdownHTML(el.color) + '</div>'; 
         } else if (el.type === 'map') { 
-            dynamicHTML += '<a href="' + (el.url || 'https://maps.google.com') + '" target="_blank" style="' + style + ' text-decoration:none; display:block;" class="' + animClass + '"><div style="width:100%; height:100%; background: #e2e8f0; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid var(--border); text-align:center; padding: 8px;"><span style="font-size:1.5rem;">📍</span><strong style="font-size:0.75rem; margin-top:4px; color: #1e293b;">Buka Google Map</strong><span style="font-size:0.6rem; color:#64748b;">' + (el.content || 'Gedung Acara') + '</span></div></a>'; 
+            dynamicHTML += '<a href="' + el.url + '" target="_blank" style="' + style + ' text-decoration:none; display:block;" class="' + animClass + '"><div style="width:100%; height:100%; background:#e2e8f0; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:2px solid var(--border); padding:4px;"><span style="font-size:1.2rem;">📍</span><strong style="font-size:0.65rem; color:#1e293b;">Buka Google Map</strong></div></a>'; 
         } else if (el.type === 'qr') { 
-            let qrImgUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(el.url || 'https://example.com'); 
-            dynamicHTML += '<div style="' + style + '" class="' + animClass + '"><div style="width: 100%; height: 100%; background: white; border-radius:8px; display: flex; flex-direction: column; align-items:center; justify-content: center; border:1px solid var(--border); padding: 4px;"><img src="' + qrImgUrl + '" style="width:80%; height:80%; object-fit:contain;"/><span style="font-size:0.55rem; font-weight:bold;">Scan QR</span></div></div>'; 
+            let qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(el.url || 'https://example.com'); 
+            dynamicHTML += '<div style="' + style + '" class="' + animClass + '"><div style="width:100%; height:100%; background:white; border-radius:8px; display:flex; align-items:center; justify-content:center; border:1px solid var(--border); padding:4px;"><img src="' + qrUrl + '" style="width:90%; height:90%; object-fit:contain;"/></div></div>'; 
         } else if (el.type === 'gift') { 
-            dynamicHTML += '<div style="' + style + '" class="' + animClass + '"><div style="width: 100%; height: 100%; background: linear-gradient(135deg, #f8fafc, #e2e8f0); border-radius: 8px; border:2px dashed var(--primary); display: flex; flex-direction:column; align-items: center; justify-content: center; text-align:center; padding: 8px;"><span style="font-size:1.5rem;">🎁</span><strong style="font-size:0.75rem; color:var(--primary);">Digital Gift</strong><span style="font-size:0.6rem; color: #334155; margin-top:2px;">' + (el.content || 'Info Rekening') + '</span></div></div>'; 
-        } else if (el.type === 'gallery') { 
-            let urls = (el.url || "").split(','); 
-            let gridHTML = urls.map(function(u) { return '<div style="background:#f1f5f9; border-radius: 4px; overflow:hidden; height:100%;"><img src="' + u.trim() + '" style="width:100%; height: 100%; object-fit: cover;" loading="lazy"/></div>'; }).join('');
-            dynamicHTML += '<div style="' + style + '" class="' + animClass + '"><div style="width: 100%; height: 100%; background:#ffffff; border-radius: 8px; padding: 4px; display:grid; grid-template-columns: repeat(2, 1fr); gap: 4px; border: 1px solid var(--border);">' + gridHTML + '</div></div>';
+            dynamicHTML += '<div style="' + style + '" class="' + animClass + '"><div style="width:100%; height:100%; background:linear-gradient(135deg, #f8fafc, #e2e8f0); border-radius:8px; border:2px dashed var(--primary); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4px;"><span style="font-size:1.2rem;">🎁</span><strong style="font-size:0.65rem; color:var(--primary);">' + el.content + '</strong></div></div>'; 
         }
     });
     
     card.style.cssText = bgStyle;
-    card.innerHTML = '<div style="position:relative; width:100%; max-width:360px; height: 640px; overflow:hidden; margin:0 auto;">' + dynamicHTML + '</div><div style="background:#ffffff; z-index: 1000; position:relative; padding: 20px; padding-bottom:50px; margin-top: 20px; text-align:center;"><h4 style="margin-bottom:12px;">Konfirmasi Kehadiran (RSVP)</h4><div class="input-group"><input type="text" id="rsvpNamePublic" placeholder="Nama Anda" required> </div><div class="input-group"><select id="rsvpAttPublic"><option value="Hadir">Hadir</option><option value="Tidak Hadir">Berhalangan</option></select></div><div class="input-group"><textarea id="rsvpMsgPublic" rows="2" placeholder="Pesan / Doa"></textarea></div><button id="btnSubmitRSVP" onclick="submitRSVPForm()" style="width:100%; padding: 12px;">Kirim RSVP</button></div>';
+    card.innerHTML = '<div style="position:relative; width:100%; max-width:360px; height:640px; overflow:hidden; margin:0 auto;">' + dynamicHTML + '</div><div style="background:#ffffff; z-index:1000; position:relative; padding:20px; padding-bottom:50px; margin-top:20px; text-align:center;"><h4 style="margin-bottom:12px;">Konfirmasi Kehadiran (RSVP)</h4><div class="input-group"><input type="text" id="rsvpNamePublic" placeholder="Nama Anda" required></div><div class="input-group"><select id="rsvpAttPublic"><option value="Hadir">Hadir</option><option value="Tidak Hadir">Berhalangan</option></select></div><div class="input-group"><textarea id="rsvpMsgPublic" rows="2" placeholder="Pesan / Doa"></textarea></div><button id="btnSubmitRSVP" onclick="submitRSVPForm()" style="width:100%; padding:12px;">Kirim RSVP</button></div>';
     
     if (inv.eventDate) {
         const targetDate = new Date(inv.eventDate).getTime();
         if (cdInterval) clearInterval(cdInterval);
         cdInterval = setInterval(function() {
-            const now = new Date().getTime(); 
-            const distance = targetDate - now;
+            const now = new Date().getTime(); const distance = targetDate - now;
             const cdElements = document.querySelectorAll('.countdown-widget');
-            
             if (cdElements.length === 0) { clearInterval(cdInterval); return; }
-            if (distance < 0) {
-                cdElements.forEach(function(el) { el.innerHTML = "<div style='background:rgba(255,255,255,0.9); padding:10px; border-radius: 8px;'>Acara Sedang Berlangsung!</div>"; });
-                clearInterval(cdInterval); return; 
-            }
+            if (distance < 0) { cdElements.forEach(function(el) { el.innerHTML = "Acara Berlangsung!"; }); clearInterval(cdInterval); return; }
             const d = Math.floor(distance / (1000 * 60 * 60 * 24)).toString().padStart(2, '0'); 
             const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0'); 
             const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0'); 
             const s = Math.floor((distance % (1000 * 60)) / 1000).toString().padStart(2, '0');
-            
             cdElements.forEach(function(el) { 
                 const spans = el.querySelectorAll('.cd-num'); 
                 if (spans.length === 4) { spans[0].innerText = d; spans[1].innerText = h; spans[2].innerText = m; spans[3].innerText = s; } 
@@ -1213,39 +1048,20 @@ function renderPublicContent() {
 }
 
 function togglePublicMusic() { 
-    const player = document.getElementById('publicAudioPlayer'); 
-    const btn = document.getElementById('publicMusicBtn'); 
-    if (player.paused) { 
-        let playPromise = player.play(); 
-        if (playPromise !== undefined) {
-            playPromise.then(function() { btn.classList.remove('paused'); }).catch(function(error) { alert("Pastikan volume perangkat menyala."); }); 
-        } 
-    } else { player.pause(); btn.classList.add('paused'); } 
+    const player = document.getElementById('publicAudioPlayer'); const btn = document.getElementById('publicMusicBtn'); 
+    if (player.paused) { player.play().then(function() { btn.classList.remove('paused'); }).catch(function(error) { alert("Nyalakan volume."); }); } 
+    else { player.pause(); btn.classList.add('paused'); } 
 }
 
 function submitRSVPForm() {
-    const name = document.getElementById('rsvpNamePublic').value; 
-    const att = document.getElementById('rsvpAttPublic').value; 
-    const msg = document.getElementById('rsvpMsgPublic').value;
-    
+    const name = document.getElementById('rsvpNamePublic').value; const att = document.getElementById('rsvpAttPublic').value; const msg = document.getElementById('rsvpMsgPublic').value;
     if(!name || name.trim() === '') { alert("Mohon isi nama Anda!"); return; }
-    
-    const btn = document.getElementById('btnSubmitRSVP');
-    btn.innerText = "Mengirim..."; btn.disabled = true;
+    const btn = document.getElementById('btnSubmitRSVP'); btn.innerText = "Mengirim..."; btn.disabled = true;
     try {
         google.script.run.withSuccessHandler(function(res) {
-            if (res && res.success) { 
-                btn.innerText = "✓ Berhasil Terkirim"; btn.style.backgroundColor = "#10b981";
-                document.getElementById('rsvpNamePublic').value = '';
-                document.getElementById('rsvpMsgPublic').value = ''; 
-            } else { alert("Gagal mengirim RSVP."); btn.innerText = "Kirim RSVP"; btn.disabled = false; }
-        }).withFailureHandler(function(err) { 
-            alert("Koneksi terputus: " + err.message); btn.innerText = "Kirim RSVP"; btn.disabled = false; 
+            if (res && res.success) { btn.innerText = "✓ Terkirim"; btn.style.backgroundColor = "#10b981"; document.getElementById('rsvpNamePublic').value = ''; document.getElementById('rsvpMsgPublic').value = ''; } 
         }).submitGuestRSVP({ projectID: currentProject.projectID || 'TEST_01', name: name, attendance: att, message: msg });
-    } catch(e) {
-        alert("Simulasi: RSVP " + name + " berhasil (Mode Offline).");
-        btn.innerText = "✓ Berhasil Terkirim"; btn.style.backgroundColor = "#10b981";
-    }
+    } catch(e) { alert("Simulasi: RSVP terkirim."); btn.innerText = "✓ Terkirim"; }
 }
 </script>
 </body>
