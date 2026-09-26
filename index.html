@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Design Editor V1.35.0 Smooth Drag & Resize</title>
+<title>Design Editor V1.36.0 Smart Toolbar</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root { --primary: #4f46e5; --bg-color: #f1f5f9; --canvas-bg: #e2e8f0; --toolbar-bg: #ffffff; --text-main: #1e293b; --border: #cbd5e1; --success: #10b981; }
@@ -126,7 +126,7 @@ window.addEventListener('beforeunload', function (e) {
 <div id="mainAppContainer" style="display: flex; flex-direction: column; flex: 1;">
     <div id="view-dashboard" class="view-section active">
         <header style="border-radius: 12px; margin-bottom: 16px; max-width: 800px; margin-inline: auto; width: 100%; padding: 10px 0;">
-            <h1>Design Editor <span style="font-size:0.6rem; background: var(--success); color: white; padding:3px 8px; border-radius: 4px; vertical-align: middle;">V1.35.0 STABLE</span></h1>
+            <h1>Design Editor <span style="font-size:0.6rem; background: var(--success); color: white; padding:3px 8px; border-radius: 4px; vertical-align: middle;">V1.36.0 STABLE</span></h1>
             <span id="userBadge" style="font-size: 0.75rem; color: var(--primary); font-weight:bold;">Memuat ID...</span>
         </header>
         <div class="dashboard-grid">
@@ -299,7 +299,7 @@ window.addEventListener('beforeunload', function (e) {
 const urlParams = new URLSearchParams(window.location.search);
 const serverPublishId = urlParams.get('id') || "";
 let currentUserId = "USER_" + Math.random().toString(36).substring(2, 9).toUpperCase();
-let currentProject = { projectID: "", version: "1.35.0", elements: [], invitation: {} };
+let currentProject = { projectID: "", version: "1.36.0", elements: [], invitation: {} };
 let selectedElementId = null;
 let multiSelectedIds = [];
 let historyStack = [];
@@ -459,7 +459,7 @@ function migrateData(project) {
         if (el.filter === undefined) el.filter = 'none'; 
         if (el.animation === undefined) el.animation = 'none';
     }); 
-    project.version = "1.35.0";
+    project.version = "1.36.0";
 }
 
 function openEditorWithTemplate(t) {
@@ -467,7 +467,7 @@ function openEditorWithTemplate(t) {
     currentProject = { 
         projectID: 'PROJ_' + Math.random().toString(36).substring(2, 8).toUpperCase(), 
         userId: currentUserId, 
-        version: "1.35.0", 
+        version: "1.36.0", 
         invitation: config.invitation || {}, 
         elements: config.elements || [] 
     };
@@ -640,7 +640,6 @@ function startDrag(e, id) {
     selectedElementId = id;
     if (!multiSelectedIds.includes(id)) { multiSelectedIds = [id]; }
     
-    // Jangan renderCanvas ulang di sini agar sentuhan tidak terlepas
     isDragging = true; 
     activePointerId = e.pointerId;
 
@@ -680,7 +679,6 @@ function onDrag(e) {
         
         el.x = newX; el.y = newY; 
         
-        // Update langsung posisi DOM element tanpa render ulang seluruh kanvas (Sangat Halus)
         const domEl = document.getElementById(selectedElementId);
         if (domEl) {
             domEl.style.left = el.x + 'px';
@@ -701,7 +699,7 @@ function stopDrag(e) {
         document.getElementById('guideV').style.display = 'none';
         document.getElementById('guideH').style.display = 'none';
         saveToHistory(); 
-        renderCanvas(); // Render ulang setelah selesai geser untuk merapikan handle
+        renderCanvas(); 
     } 
 }
 
@@ -743,7 +741,6 @@ function onResize(e) {
     el.width = Math.round(w); el.height = Math.round(h); el.x = Math.round(x); el.y = Math.round(y); 
     if (el.type === 'text') el.size = Math.max(10, Math.round(resizingData.origSize * (el.width / resizingData.origWidth))); 
     
-    // Update DOM langsung tanpa render ulang penuh agar tidak patah-patah
     const domEl = document.getElementById(resizingData.id);
     if (domEl) {
         domEl.style.width = el.width + 'px';
@@ -867,7 +864,14 @@ function updateFloatingActionBar() {
     if (domEl && elData) {
         const scale = getTotalScale(); 
         fab.style.display = 'flex';
-        fab.style.top = (elData.y * scale - 50) + 'px'; 
+        
+        // POSISI CERDAS: Jika objek terlalu dekat ke atas, menu edit otomatis ditaruh di bawah objek
+        let topPos = (elData.y * scale) - 55;
+        if (topPos < 10) {
+            topPos = (elData.y * scale) + (domEl.offsetHeight * scale) + 15;
+        }
+        
+        fab.style.top = topPos + 'px'; 
         fab.style.left = (elData.x * scale + (domEl.offsetWidth * scale / 2)) + 'px';
         document.getElementById('btnFabLock').innerText = elData.locked ? '🔓' : '🔒'; 
         document.getElementById('btnFabHide').innerText = elData.visible === false ? '👁️' : '🕶️'; 
