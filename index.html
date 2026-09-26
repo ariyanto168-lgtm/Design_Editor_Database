@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Design Editor V1.38.0 Bottom Sheet Layout</title>
+<title>Design Editor V1.39.0 Ultra Smooth</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root { --primary: #4f46e5; --bg-color: #f1f5f9; --canvas-bg: #e2e8f0; --toolbar-bg: #ffffff; --text-main: #1e293b; --border: #cbd5e1; --success: #10b981; }
@@ -53,13 +53,13 @@ button:disabled { opacity: .7; cursor: not-allowed; }
 .guide-v { width: 1px; height: 100%; top: 0; left: 180px; }
 .guide-h { width: 100%; height: 1px; left: 0; top: 320px; }
 
-/* Panel Bawah Responsif (Bottom Sheet untuk Properti Objek) */
-.property-bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: #fff; border-radius: 20px 20px 0 0; padding: 20px; box-shadow: 0 -4px 25px rgba(0,0,0,0.2); transition: bottom .3s cubic-bezier(.4,0,.2,1); z-index: 2500; max-height: 75vh; overflow-y: auto; }
+/* Panel Bawah Properti (Bottom Sheet) dengan Tombol Minimalkan untuk Full Layar */
+.property-bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: #fff; border-radius: 20px 20px 0 0; padding: 16px; box-shadow: 0 -4px 25px rgba(0,0,0,0.2); transition: bottom .3s cubic-bezier(.4,0,.2,1); z-index: 2500; max-height: 70vh; overflow-y: auto; }
 .property-bottom-sheet.active { bottom: 0; }
-.sheet-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 14px; }
-.sheet-close { font-size: 1.5rem; background: 0 0; color: var(--text-main); padding: 2px 8px; cursor: pointer; }
-.property-actions-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
-.property-actions-grid button { padding: 10px 4px; font-size: 0.8rem; background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.sheet-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 12px; }
+.sheet-close { font-size: 1.4rem; background: 0 0; color: var(--text-main); padding: 2px 8px; cursor: pointer; }
+.property-actions-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
+.property-actions-grid button { padding: 8px 4px; font-size: 0.78rem; background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 2px; }
 
 .editor-bottom-bar { display: flex; justify-content: space-around; background: var(--toolbar-bg); padding: 12px 8px; border-top: 1px solid var(--border); z-index: 100; padding-bottom: max(14px, env(safe-area-inset-bottom)); box-shadow: 0 -4px 10px rgba(0,0,0,.03); }
 .bottom-tool { display: flex; flex-direction: column; align-items: center; font-size: .8rem; font-weight: 600; color: var(--text-main); background: 0 0; padding: 6px 12px; border: none; cursor: pointer; gap: 4px; }
@@ -67,9 +67,9 @@ button:disabled { opacity: .7; cursor: not-allowed; }
 
 .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: #fff; border-radius: 20px 20px 0 0; padding: 20px; box-shadow: 0 -4px 25px rgba(0,0,0,.15); transition: bottom .3s cubic-bezier(.4,0,.2,1); z-index: 2000; max-height: 80vh; overflow-y: auto; }
 .bottom-sheet.active { bottom: 0; }
-.input-group { margin-bottom: 12px; }
+.input-group { margin-bottom: 10px; }
 .input-group label { display: block; font-size: .75rem; font-weight: 700; margin-bottom: 4px; color: #64748b; }
-.input-group input, .input-group select, .input-group textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; }
+.input-group input, .input-group select, .input-group textarea { width: 100%; padding: 9px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; }
 .asset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-height: 240px; overflow-y: auto; padding-right: 5px; }
 .asset-item { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; cursor: pointer; }
 .asset-item img { width: 100%; height: 55px; object-fit: contain; }
@@ -130,7 +130,7 @@ window.addEventListener('beforeunload', function (e) { e.preventDefault(); e.ret
 <div id="mainAppContainer" style="display: flex; flex-direction: column; flex: 1;">
     <div id="view-dashboard" class="view-section active">
         <header style="border-radius: 12px; margin-bottom: 16px; max-width: 800px; margin-inline: auto; width: 100%; padding: 10px 0;">
-            <h1>Design Editor <span style="font-size:0.6rem; background: var(--success); color: white; padding:3px 8px; border-radius: 4px; vertical-align: middle;">V1.38.0 STABLE</span></h1>
+            <h1>Design Editor <span style="font-size:0.6rem; background: var(--success); color: white; padding:3px 8px; border-radius: 4px; vertical-align: middle;">V1.39.0 STABLE</span></h1>
             <span id="userBadge" style="font-size: 0.75rem; color: var(--primary); font-weight:bold;">Memuat ID...</span>
         </header>
         <div class="dashboard-grid">
@@ -180,10 +180,10 @@ window.addEventListener('beforeunload', function (e) { e.preventDefault(); e.ret
                 </div>
             </div>
             
-            <!-- Panel Bawah Property Editor (Responsive Bottom Sheet) -->
+            <!-- Panel Bawah Property Editor dengan Tombol Minimalkan -->
             <div id="propertyBottomSheet" class="property-bottom-sheet">
                 <div class="sheet-header">
-                    <strong style="font-size: 0.95rem;">Pengaturan Objek</strong>
+                    <button onclick="minimizePropertySheet()" style="background: #e2e8f0; color: #1e293b; padding: 4px 10px; font-size: 0.8rem;">🔽 Minimalkan (Full Layar)</button>
                     <button class="sheet-close" onclick="clearSelection({target:{id:'mainCanvas'}})">✕</button>
                 </div>
                 <div class="property-actions-grid">
@@ -198,33 +198,33 @@ window.addEventListener('beforeunload', function (e) { e.preventDefault(); e.ret
                 
                 <div id="propTextContainer" class="input-group">
                     <label>Isi Teks / Multi-Baris (Tekan Enter untuk baris baru)</label>
-                    <textarea id="propText" rows="3" oninput="updateSelectedObjectProp('content', this.value)"></textarea>
+                    <textarea id="propText" rows="3" oninput="updateLiveProp('content', this.value)" onchange="saveToHistory()"></textarea>
                 </div>
                 <div id="propLinkContainer" class="input-group" style="display:none;">
                     <label>URL / Link / Galeri (Pisahkan dengan koma)</label>
-                    <input type="text" id="propLink" oninput="updateSelectedObjectProp('url', this.value)">
+                    <input type="text" id="propLink" oninput="updateLiveProp('url', this.value)" onchange="saveToHistory()">
                 </div>
                 <div id="propImgContainer" class="input-group" style="display:none;">
                     <label>URL Gambar / Foto</label>
-                    <input type="text" id="propImage" oninput="updateSelectedObjectProp('url', this.value)">
+                    <input type="text" id="propImage" oninput="updateLiveProp('url', this.value)" onchange="saveToHistory()">
                 </div>
                 <div style="display: flex; gap:8px;">
                     <div id="propColorContainer" class="input-group" style="flex:1;">
                         <label>Warna Teks / Latar</label>
-                        <input type="color" id="propColor" oninput="updateSelectedObjectProp('color', this.value)" style="height: 38px;">
+                        <input type="color" id="propColor" oninput="updateLiveProp('color', this.value)" onchange="saveToHistory()" style="height: 38px;">
                     </div>
                     <div id="propSizeContainer" class="input-group" style="flex:1;">
                         <label>Ukuran Font</label>
-                        <input type="number" id="propSize" oninput="updateSelectedObjectProp('size', parseInt(this.value))">
+                        <input type="number" id="propSize" oninput="updateLiveProp('size', parseInt(this.value))" onchange="saveToHistory()">
                     </div>
                 </div>
                 <div style="display: flex; gap:8px;">
-                    <div class="input-group" style="flex:1;"><label>Lebar (px)</label><input type="number" id="propWidth" oninput="updateSelectedObjectProp('width', parseInt(this.value))"></div>
-                    <div class="input-group" style="flex:1;"><label>Tinggi (px)</label><input type="number" id="propHeight" oninput="updateSelectedObjectProp('height', parseInt(this.value))"></div>
+                    <div class="input-group" style="flex:1;"><label>Lebar (px)</label><input type="number" id="propWidth" oninput="updateLiveProp('width', parseInt(this.value))" onchange="saveToHistory()"></div>
+                    <div class="input-group" style="flex:1;"><label>Tinggi (px)</label><input type="number" id="propHeight" oninput="updateLiveProp('height', parseInt(this.value))" onchange="saveToHistory()"></div>
                 </div>
                 <div style="display: flex; gap:8px;">
-                    <div class="input-group" style="flex:1;"><label>Opacity</label><input type="number" step="0.1" min="0" max="1" id="propOpacity" oninput="updateSelectedObjectProp('opacity', parseFloat(this.value))"></div>
-                    <div class="input-group" style="flex:1;"><label>Rotasi (°)</label><input type="number" id="propRotation" oninput="updateSelectedObjectProp('rotation', parseInt(this.value))"></div>
+                    <div class="input-group" style="flex:1;"><label>Opacity</label><input type="number" step="0.1" min="0" max="1" id="propOpacity" oninput="updateLiveProp('opacity', parseFloat(this.value))" onchange="saveToHistory()"></div>
+                    <div class="input-group" style="flex:1;"><label>Rotasi (°)</label><input type="number" id="propRotation" oninput="updateLiveProp('rotation', parseInt(this.value))" onchange="saveToHistory()"></div>
                 </div>
                 <div class="input-group" style="display: flex; align-items: center; gap:8px;">
                     <input type="checkbox" id="propLockRatio" onchange="toggleLockRatio(this.checked)" style="width:18px; height:18px;">
@@ -232,19 +232,19 @@ window.addEventListener('beforeunload', function (e) { e.preventDefault(); e.ret
                 </div>
                 <div style="display: flex; gap:8px;">
                     <div id="propFontContainer" class="input-group" style="flex:1;"><label>Font</label>
-                        <select id="propFont" onchange="updateSelectedObjectProp('fontFamily', this.value)">
+                        <select id="propFont" onchange="updateLiveProp('fontFamily', this.value); saveToHistory();">
                             <option value="sans-serif">Modern</option><option value="serif">Klasik</option><option value="'Brush Script MT', cursive">Tulisan Tangan</option>
                         </select>
                     </div>
                     <div class="input-group" style="flex:1;"><label>Animasi</label>
-                        <select id="propAnimation" onchange="updateSelectedObjectProp('animation', this.value)">
+                        <select id="propAnimation" onchange="updateLiveProp('animation', this.value); saveToHistory();">
                             <option value="none">Tidak Ada</option><option value="eff-fadeIn">Fade In</option><option value="eff-slideUp">Slide Up</option><option value="eff-slideDown">Slide Down</option><option value="eff-zoomIn">Zoom In</option><option value="eff-typewriter">Typewriter (Ketik)</option>
                         </select>
                     </div>
                 </div>
                 <div id="propAnimSpeedContainer" class="input-group" style="display:none;">
                     <label>Kecepatan Typewriter (Detik: 1s - 8s)</label>
-                    <input type="number" id="propAnimSpeed" min="1" max="10" value="3" oninput="updateSelectedObjectProp('animSpeed', parseInt(this.value))">
+                    <input type="number" id="propAnimSpeed" min="1" max="10" value="3" oninput="updateLiveProp('animSpeed', parseInt(this.value))" onchange="saveToHistory()">
                 </div>
             </div>
         </div>
@@ -323,7 +323,7 @@ window.addEventListener('beforeunload', function (e) { e.preventDefault(); e.ret
 const urlParams = new URLSearchParams(window.location.search);
 const serverPublishId = urlParams.get('id') || "";
 let currentUserId = "USER_" + Math.random().toString(36).substring(2, 9).toUpperCase();
-let currentProject = { projectID: "", version: "1.38.0", elements: [], invitation: {} };
+let currentProject = { projectID: "", version: "1.39.0", elements: [], invitation: {} };
 let selectedElementId = null;
 let multiSelectedIds = [];
 let historyStack = [];
@@ -456,14 +456,14 @@ function migrateData(project) {
         if (el.animation === undefined) el.animation = 'none';
         if (el.animSpeed === undefined) el.animSpeed = 3;
     }); 
-    project.version = "1.38.0";
+    project.version = "1.39.0";
 }
 
 function openEditorWithTemplate(t) {
     let config = typeof t.configJSON === 'string' ? JSON.parse(t.configJSON) : t.configJSON;
     currentProject = { 
         projectID: 'PROJ_' + Math.random().toString(36).substring(2, 8).toUpperCase(), 
-        userId: currentUserId, version: "1.38.0", 
+        userId: currentUserId, version: "1.39.0", 
         invitation: config.invitation || {}, elements: config.elements || [] 
     };
     
@@ -737,8 +737,12 @@ function stopRotate() {
 
 function changeLayer(d) { 
     let t = multiSelectedIds.length > 0 ? multiSelectedIds : [selectedElementId]; 
-    t.forEach(function(id) { let el = currentProject.elements.find(function(i) { return i.id === id; }); if (el) el.zIndex = Math.max(1, (el.zIndex || 1) + d); });
-    saveToHistory(); renderCanvas(); 
+    t.forEach(function(id) { 
+        let el = currentProject.elements.find(function(i) { return i.id === id; }); 
+        if (el) el.zIndex = Math.max(1, (el.zIndex || 1) + d); 
+    });
+    saveToHistory(); 
+    renderCanvas(); 
 }
 
 function toggleLockSelected() { const el = currentProject.elements.find(function(i) { return i.id === selectedElementId; }); if (el) { el.locked = !el.locked; saveToHistory(); renderCanvas(); } }
@@ -806,12 +810,29 @@ function updatePropertyBottomSheet() {
     }
 }
 
-function updateSelectedObjectProp(prop, val) { 
+function minimizePropertySheet() {
+    const sheet = document.getElementById('propertyBottomSheet');
+    sheet.classList.remove('active');
+}
+
+function updateLiveProp(prop, val) { 
     const el = currentProject.elements.find(function(i) { return i.id === selectedElementId; }); 
     if (el) { 
         el[prop] = val; 
         if (prop === 'animation') { document.getElementById('propAnimSpeedContainer').style.display = val === 'eff-typewriter' ? 'block' : 'none'; }
-        renderCanvas(); saveToHistory(); 
+        
+        // Update DOM langsung tanpa render ulang penuh agar tidak macet saat mengetik/geser slider
+        const domEl = document.getElementById(selectedElementId);
+        if (domEl) {
+            if (prop === 'content' && el.type === 'text') domEl.innerText = val;
+            if (prop === 'size' && el.type === 'text') domEl.style.fontSize = val + 'px';
+            if (prop === 'color' && el.type === 'text') domEl.style.color = val;
+            if (prop === 'width') { el.width = val; domEl.style.width = val + 'px'; }
+            if (prop === 'height') { el.height = val; domEl.style.height = val + 'px'; }
+            if (prop === 'opacity') { domEl.style.opacity = val; }
+            if (prop === 'rotation') { domEl.style.transform = "rotate(" + val + "deg)"; }
+        }
+        triggerAutoSave();
     } 
 }
 
@@ -823,7 +844,7 @@ function addObject(type) {
     if (type === 'text') { newObj.content = 'Teks Baru\nBaris Kedua'; newObj.size = 24; newObj.color = '#1e293b'; newObj.fontFamily = 'sans-serif'; }
     else if (type === 'shape') { newObj.color = 'var(--primary)'; }
     else if (type === 'image') { newObj.url = 'https://cdn-icons-png.flaticon.com/512/833/833472.png'; newObj.width = 120; newObj.height = 120; }
-    else if (type === 'button') { newObj.content = 'Buka Peta'; newObj.color = 'var(--primary)'; newObj.url = 'https://maps.google.com'; }
+    else if (type === 'button') { newObj.content = 'Buka Peta'; newObj.color = 'var(--primary);'; newObj.url = 'https://maps.google.com'; }
     else if (type === 'countdown') { newObj.color = '#475569'; newObj.width = 240; newObj.height = 60; } 
     else if (type === 'map') { newObj.content = 'Lokasi Acara'; newObj.url = 'https://maps.google.com'; }
     else if (type === 'qr') { newObj.url = 'https://example.com'; newObj.width = 120; newObj.height = 120; } 
@@ -1052,7 +1073,7 @@ function togglePublicMusic() {
 }
 
 function submitRSVPForm() {
-    const name = document.getElementById('rsvpNamePublic').value; const att = document.getElementById('rsvpAttPublic').value; const msg = document.getElementById('rsvpMsgPublic').value;
+    const name = document.getElementById('rsvpNamePublic'].value; const att = document.getElementById('rsvpAttPublic').value; const msg = document.getElementById('rsvpMsgPublic').value;
     if(!name || name.trim() === '') { alert("Mohon isi nama Anda!"); return; }
     const btn = document.getElementById('btnSubmitRSVP'); btn.innerText = "Mengirim..."; btn.disabled = true;
     try {
