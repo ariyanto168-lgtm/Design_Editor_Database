@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Design Editor V1.31.0 Mobile Dynamic</title>
+<title>Design Editor V1.32.0 Fully Dynamic</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root { --primary: #4f46e5; --bg-color: #f1f5f9; --canvas-bg: #e2e8f0; --toolbar-bg: #ffffff; --text-main: #1e293b; --border: #cbd5e1; --success: #10b981; }
@@ -126,7 +126,7 @@ window.addEventListener('beforeunload', function (e) {
 <div id="mainAppContainer" style="display: flex; flex-direction: column; flex: 1;">
     <div id="view-dashboard" class="view-section active">
         <header style="border-radius: 12px; margin-bottom: 16px; max-width: 800px; margin-inline: auto; width: 100%; padding: 10px 0;">
-            <h1>Design Editor <span style="font-size:0.6rem; background: var(--success); color: white; padding:3px 8px; border-radius: 4px; vertical-align: middle;">V1.31.0 DYNAMIC</span></h1>
+            <h1>Design Editor <span style="font-size:0.6rem; background: var(--success); color: white; padding:3px 8px; border-radius: 4px; vertical-align: middle;">V1.32.0 DYNAMIC ELEMENTS</span></h1>
             <span id="userBadge" style="font-size: 0.75rem; color: var(--primary); font-weight:bold;">Memuat ID...</span>
         </header>
         <div class="dashboard-grid">
@@ -299,7 +299,7 @@ window.addEventListener('beforeunload', function (e) {
 const urlParams = new URLSearchParams(window.location.search);
 const serverPublishId = urlParams.get('id') || "";
 let currentUserId = "USER_" + Math.random().toString(36).substring(2, 9).toUpperCase();
-let currentProject = { projectID: "", version: "1.31.0", elements: [], invitation: {} };
+let currentProject = { projectID: "", version: "1.32.0", elements: [], invitation: {} };
 let selectedElementId = null;
 let multiSelectedIds = [];
 let historyStack = [];
@@ -340,9 +340,6 @@ function bootApplication() {
 document.addEventListener('DOMContentLoaded', bootApplication);
 window.onload = bootApplication;
 
-// ==========================================
-// FITUR PINCH-TO-ZOOM & GESTUR HP DINAMIS
-// ==========================================
 let initialPinchDistance = null;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -498,7 +495,7 @@ function migrateData(project) {
         if (el.filter === undefined) el.filter = 'none'; 
         if (el.animation === undefined) el.animation = 'none';
     }); 
-    project.version = "1.31.0";
+    project.version = "1.32.0";
 }
 
 function openEditorWithTemplate(t) {
@@ -506,10 +503,21 @@ function openEditorWithTemplate(t) {
     currentProject = { 
         projectID: 'PROJ_' + Math.random().toString(36).substring(2, 8).toUpperCase(), 
         userId: currentUserId, 
-        version: "1.31.0", 
+        version: "1.32.0", 
         invitation: config.invitation || {}, 
         elements: config.elements || [] 
     };
+    
+    // Jika elemen kosong (kanvas bersih), buat otomatis elemen teks dinamis (The Wedding of, Nama, Tanggal) agar bisa digeser/diatur bebas
+    if (currentProject.elements.length === 0) {
+        let gName = currentProject.invitation.groomName || 'Pria';
+        let bName = currentProject.invitation.brideName || 'Wanita';
+        currentProject.elements = [
+            { id: 'el_title', type: 'text', content: 'The Wedding of', x: 90, y: 80, width: 180, height: 30, size: 16, color: '#475569', fontFamily: 'sans-serif', zIndex: 1, rotation: 0, opacity: 1, visible: true, locked: false, lockRatio: false, filter: 'none', animation: 'none' },
+            { id: 'el_names', type: 'text', content: gName + ' & ' + bName, x: 40, y: 120, width: 280, height: 50, size: 26, color: '#4f46e5', fontFamily: 'serif', zIndex: 2, rotation: 0, opacity: 1, visible: true, locked: false, lockRatio: false, filter: 'none', animation: 'none' }
+        ];
+    }
+
     migrateData(currentProject); 
     customZoomMultiplier = 1;
     startEditor();
@@ -529,7 +537,19 @@ function startEditor() {
 }
 
 function updateInvitationData(key, val) {
-    currentProject.invitation[key] = val; renderCanvas(); triggerAutoSave(); 
+    currentProject.invitation[key] = val; 
+    
+    // Sinkronisasi otomatis ke elemen teks jika nama pengantin diubah di menu Data
+    if (key === 'groomName' || key === 'brideName') {
+        let nameEl = currentProject.elements.find(function(e) { return e.id === 'el_names'; });
+        if (nameEl) {
+            let g = currentProject.invitation.groomName || 'Pria';
+            let b = currentProject.invitation.brideName || 'Wanita';
+            nameEl.content = g + ' & ' + b;
+        }
+    }
+    
+    renderCanvas(); triggerAutoSave(); 
 }
 
 function updateBackground(type, val) { 
@@ -572,17 +592,6 @@ function renderCanvas() {
     } else {
         canvas.style.backgroundImage = 'none'; 
         canvas.style.backgroundColor = inv.bgColor || '#ffffff'; 
-    }
-    
-    if (inv.groomName || inv.brideName || inv.eventDate) {
-        const staticBase = document.createElement('div');
-        staticBase.style.position = 'absolute'; 
-        staticBase.style.width = '100%'; 
-        staticBase.style.height = '100%'; 
-        staticBase.style.zIndex = '0';
-        let dateStr = inv.eventDate ? new Date(inv.eventDate).toLocaleDateString('id-ID') : '';
-        staticBase.innerHTML = '<div style="padding-top: 50px; pointer-events: none; text-align:center;"><p style="font-size:0.75rem; color: #475569; letter-spacing:2px;">The Wedding of</p><h2 style="font-size:2rem; color:var(--primary); margin:10px 0; font-family:serif;">' + (inv.groomName || 'Pria') + ' & ' + (inv.brideName || 'Wanita') + '</h2><p style="font-size:0.85rem; font-weight: bold;">' + dateStr + '</p></div>';
-        canvas.appendChild(staticBase);
     }
     
     let sortedElements = [...currentProject.elements].sort(function(a,b) { return (a.zIndex || 1) - (b.zIndex || 1); });
@@ -1005,7 +1014,7 @@ function loadTemplatesCatalog() {
             if (res && res.success) {
                 let html = '';
                 if (res.templates.length === 0) { 
-                    html = '<div class="card-menu" onclick="openEditorWithTemplate({templateID:\'DEF\', name: \'Kanvas Kosong\', configJSON:JSON.stringify({invitation: {groomName: \'\', brideName:\'\', bgColor:\'#ffffff\'}, elements: []})})"><span class="icon">📄</span><span class="title">Kanvas Kosong (Bersih)</span></div>';
+                    html = '<div class="card-menu" onclick="openEditorWithTemplate({templateID:\'DEF\', name: \'Kanvas Kosong\', configJSON:JSON.stringify({invitation: {groomName: \'\', brideName:\'\', bgColor:\'#ffffff\'}, elements: []})})"><span class="icon">📄</span><span class="title">Kanvas Kosong (Dinamis)</span></div>';
                 } else { 
                     res.templates.forEach(function(t) {
                         html += '<div class="card-menu" onclick=\'openEditorWithTemplate(' + JSON.stringify(t) + ')\'><span class="icon">✨</span><span class="title">' + t.name + '</span></div>'; 
@@ -1193,15 +1202,9 @@ function renderPublicContent() {
     });
     
     card.style.cssText = bgStyle;
+    card.innerHTML = '<div style="position:relative; width:100%; max-width:360px; height: 640px; overflow:hidden; margin:0 auto;">' + dynamicHTML + '</div><div style="background:#ffffff; z-index: 1000; position:relative; padding: 20px; padding-bottom:50px; margin-top: 20px; text-align:center;"><h4 style="margin-bottom:12px;">Konfirmasi Kehadiran (RSVP)</h4><div class="input-group"><input type="text" id="rsvpNamePublic" placeholder="Nama Anda" required> </div><div class="input-group"><select id="rsvpAttPublic"><option value="Hadir">Hadir</option><option value="Tidak Hadir">Berhalangan</option></select></div><div class="input-group"><textarea id="rsvpMsgPublic" rows="2" placeholder="Pesan / Doa"></textarea></div><button id="btnSubmitRSVP" onclick="submitRSVPForm()" style="width:100%; padding: 12px;">Kirim RSVP</button></div>';
     
-    let headerHtml = "";
-    if (inv.groomName || inv.brideName || inv.eventDate) {
-        headerHtml = '<div class="eff-fadeIn" style="padding-top: 50px; position:relative; z-index:0; text-align:center; pointer-events: none;"><p style="font-size:0.75rem; color: #475569; letter-spacing: 2px;">The Wedding of</p><h2 style="font-size:2rem; color:var(--primary); margin: 10px 0; font-family: serif;">' + (inv.groomName ||'') + ' & ' + (inv.brideName || '') + '</h2><p style="font-size:0.9rem; font-weight: bold;">' + (inv.eventDate ? new Date(inv.eventDate).toLocaleDateString('id-ID') : '') + '</p></div>';
-    }
-    
-    card.innerHTML = '<div style="position:relative; width:100%; max-width:360px; height: 640px; overflow:hidden; margin:0 auto;">' + dynamicHTML + headerHtml + '</div><div style="background:#ffffff; z-index: 1000; position:relative; padding: 20px; padding-bottom:50px; margin-top: 20px; text-align:center;"><h4 style="margin-bottom:12px;">Konfirmasi Kehadiran (RSVP)</h4><div class="input-group"><input type="text" id="rsvpNamePublic" placeholder="Nama Anda" required> </div><div class="input-group"><select id="rsvpAttPublic"><option value="Hadir">Hadir</option><option value="Tidak Hadir">Berhalangan</option></select></div><div class="input-group"><textarea id="rsvpMsgPublic" rows="2" placeholder="Pesan / Doa"></textarea></div><button id="btnSubmitRSVP" onclick="submitRSVPForm()" style="width:100%; padding: 12px;">Kirim RSVP</button></div>';
-    
-    if (hasCountdown && inv.eventDate) {
+    if (inv.eventDate) {
         const targetDate = new Date(inv.eventDate).getTime();
         if (cdInterval) clearInterval(cdInterval);
         cdInterval = setInterval(function() {
