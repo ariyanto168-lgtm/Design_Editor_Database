@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Design Editor V1.37.0 Sidebar & Typewriter</title>
+<title>Design Editor V1.38.0 Bottom Sheet Layout</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root { --primary: #4f46e5; --bg-color: #f1f5f9; --canvas-bg: #e2e8f0; --toolbar-bg: #ffffff; --text-main: #1e293b; --border: #cbd5e1; --success: #10b981; }
@@ -19,6 +19,7 @@ button:disabled { opacity: .7; cursor: not-allowed; }
 .card-menu { background: #fff; border-radius: 12px; padding: 20px 16px; text-align: center; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,.05); cursor: pointer; }
 .card-menu .icon { font-size: 2.5rem; margin-bottom: 8px; display: block; }
 .card { background: #fff; border-radius: 12px; padding: 16px; border: 1px solid var(--border); margin-bottom: 16px; max-width: 800px; margin-inline: auto; width: 100%; }
+
 #view-editor { padding: 0; display: none; flex-direction: column; height: 100vh; overflow: hidden; background: var(--canvas-bg); position: relative; }
 #view-editor.active { display: flex; }
 .editor-top-bar { display: flex; justify-content: space-between; align-items: center; background: var(--toolbar-bg); padding: 10px 14px; border-bottom: 1px solid var(--border); z-index: 100; min-height: 60px; }
@@ -26,8 +27,8 @@ button:disabled { opacity: .7; cursor: not-allowed; }
 .autosave-indicator { font-size: .75rem; color: var(--success); font-weight: 700; opacity: 0; transition: opacity .3s; position: absolute; top: 65px; left: 12px; background: rgba(255,255,255,.95); padding: 6px 10px; border-radius: 6px; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 .autosave-indicator.show { opacity: 1; }
 
-.editor-workspace { display: flex; flex: 1; position: relative; overflow: hidden; }
-.canvas-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; overflow: auto; padding: 20px; position: relative; }
+.editor-workspace { display: flex; flex: 1; position: relative; overflow: hidden; justify-content: center; align-items: center; }
+.canvas-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; overflow: auto; padding: 20px; position: relative; width: 100%; height: 100%; }
 .canvas { width: 360px; height: 640px; background-color: #fff; position: relative; box-shadow: 0 10px 25px 5px rgba(0,0,0,.2); overflow: hidden; transform-origin: center center; transition: transform 0.1s ease-out; flex-shrink: 0; }
 .canvas-object { position: absolute; user-select: none; padding: 8px; border: 1px dashed transparent; touch-action: none; -webkit-touch-callout: none; will-change: transform, left, top; cursor: pointer; }
 .canvas-object.selected { outline: 2px solid var(--primary); border: 1px dashed rgba(255,255,255,.8); background: rgba(79, 70, 229, 0.03); }
@@ -52,12 +53,13 @@ button:disabled { opacity: .7; cursor: not-allowed; }
 .guide-v { width: 1px; height: 100%; top: 0; left: 180px; }
 .guide-h { width: 100%; height: 1px; left: 0; top: 320px; }
 
-/* Sidebar Samping Properti & Aksi */
-.editor-sidebar { width: 300px; background: #ffffff; border-left: 1px solid var(--border); display: flex; flex-direction: column; z-index: 1500; box-shadow: -4px 0 15px rgba(0,0,0,.05); overflow-y: auto; transition: transform .3s ease; }
-.sidebar-header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; font-weight: bold; }
-.sidebar-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-.sidebar-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 8px; }
-.sidebar-actions button { padding: 8px; font-size: 0.85rem; background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border); }
+/* Panel Bawah Responsif (Bottom Sheet untuk Properti Objek) */
+.property-bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: #fff; border-radius: 20px 20px 0 0; padding: 20px; box-shadow: 0 -4px 25px rgba(0,0,0,0.2); transition: bottom .3s cubic-bezier(.4,0,.2,1); z-index: 2500; max-height: 75vh; overflow-y: auto; }
+.property-bottom-sheet.active { bottom: 0; }
+.sheet-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 14px; }
+.sheet-close { font-size: 1.5rem; background: 0 0; color: var(--text-main); padding: 2px 8px; cursor: pointer; }
+.property-actions-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+.property-actions-grid button { padding: 10px 4px; font-size: 0.8rem; background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 2px; }
 
 .editor-bottom-bar { display: flex; justify-content: space-around; background: var(--toolbar-bg); padding: 12px 8px; border-top: 1px solid var(--border); z-index: 100; padding-bottom: max(14px, env(safe-area-inset-bottom)); box-shadow: 0 -4px 10px rgba(0,0,0,.03); }
 .bottom-tool { display: flex; flex-direction: column; align-items: center; font-size: .8rem; font-weight: 600; color: var(--text-main); background: 0 0; padding: 6px 12px; border: none; cursor: pointer; gap: 4px; }
@@ -65,8 +67,6 @@ button:disabled { opacity: .7; cursor: not-allowed; }
 
 .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: #fff; border-radius: 20px 20px 0 0; padding: 20px; box-shadow: 0 -4px 25px rgba(0,0,0,.15); transition: bottom .3s cubic-bezier(.4,0,.2,1); z-index: 2000; max-height: 80vh; overflow-y: auto; }
 .bottom-sheet.active { bottom: 0; }
-.sheet-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px; }
-.sheet-close { font-size: 1.6rem; background: 0 0; color: var(--text-main); padding: 4px 10px; cursor: pointer; }
 .input-group { margin-bottom: 12px; }
 .input-group label { display: block; font-size: .75rem; font-weight: 700; margin-bottom: 4px; color: #64748b; }
 .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; }
@@ -130,7 +130,7 @@ window.addEventListener('beforeunload', function (e) { e.preventDefault(); e.ret
 <div id="mainAppContainer" style="display: flex; flex-direction: column; flex: 1;">
     <div id="view-dashboard" class="view-section active">
         <header style="border-radius: 12px; margin-bottom: 16px; max-width: 800px; margin-inline: auto; width: 100%; padding: 10px 0;">
-            <h1>Design Editor <span style="font-size:0.6rem; background: var(--success); color: white; padding:3px 8px; border-radius: 4px; vertical-align: middle;">V1.37.0 STABLE</span></h1>
+            <h1>Design Editor <span style="font-size:0.6rem; background: var(--success); color: white; padding:3px 8px; border-radius: 4px; vertical-align: middle;">V1.38.0 STABLE</span></h1>
             <span id="userBadge" style="font-size: 0.75rem; color: var(--primary); font-weight:bold;">Memuat ID...</span>
         </header>
         <div class="dashboard-grid">
@@ -180,73 +180,71 @@ window.addEventListener('beforeunload', function (e) { e.preventDefault(); e.ret
                 </div>
             </div>
             
-            <!-- Sidebar Samping Properti & Aksi (Pengganti Floating Bar) -->
-            <div id="editorSidebar" class="editor-sidebar" style="display:none;">
-                <div class="sidebar-header">
-                    <span>Pengaturan Objek</span>
-                    <button onclick="clearSelection({target:{id:'mainCanvas'}})" style="background:0 0; color:#64748b; padding:2px 6px; font-size:1.1rem;">✕</button>
+            <!-- Panel Bawah Property Editor (Responsive Bottom Sheet) -->
+            <div id="propertyBottomSheet" class="property-bottom-sheet">
+                <div class="sheet-header">
+                    <strong style="font-size: 0.95rem;">Pengaturan Objek</strong>
+                    <button class="sheet-close" onclick="clearSelection({target:{id:'mainCanvas'}})">✕</button>
                 </div>
-                <div class="sidebar-body">
-                    <div class="sidebar-actions">
-                        <button onclick="toggleLockSelected()" id="btnSidebarLock" title="Kunci">🔒</button>
-                        <button onclick="toggleHideSelected()" id="btnSidebarHide" title="Sembunyikan">👁️</button>
-                        <button onclick="changeLayer(1)" title="Naik Layer">🔼</button>
-                        <button onclick="changeLayer(-1)" title="Turun Layer">🔽</button>
-                        <button onclick="duplicateSelected()" title="Duplikat">📑</button>
-                        <button onclick="groupSelected()" title="Group">🗂️</button>
-                        <button onclick="deleteSelected()" title="Hapus" style="color:red; grid-column: span 2;">🗑️ Hapus</button>
+                <div class="property-actions-grid">
+                    <button onclick="toggleLockSelected()" id="btnSheetLock"><span>🔒</span>Kunci</button>
+                    <button onclick="toggleHideSelected()" id="btnSheetHide"><span>👁️</span>Sembunyi</button>
+                    <button onclick="changeLayer(1)"><span>🔼</span>Naik</button>
+                    <button onclick="changeLayer(-1)"><span>🔽</span>Turun</button>
+                    <button onclick="duplicateSelected()"><span>📑</span>Duplikat</button>
+                    <button onclick="groupSelected()"><span>🗂️</span>Group</button>
+                    <button onclick="deleteSelected()" style="color:red; grid-column: span 2;"><span>🗑️</span>Hapus Objek</button>
+                </div>
+                
+                <div id="propTextContainer" class="input-group">
+                    <label>Isi Teks / Multi-Baris (Tekan Enter untuk baris baru)</label>
+                    <textarea id="propText" rows="3" oninput="updateSelectedObjectProp('content', this.value)"></textarea>
+                </div>
+                <div id="propLinkContainer" class="input-group" style="display:none;">
+                    <label>URL / Link / Galeri (Pisahkan dengan koma)</label>
+                    <input type="text" id="propLink" oninput="updateSelectedObjectProp('url', this.value)">
+                </div>
+                <div id="propImgContainer" class="input-group" style="display:none;">
+                    <label>URL Gambar / Foto</label>
+                    <input type="text" id="propImage" oninput="updateSelectedObjectProp('url', this.value)">
+                </div>
+                <div style="display: flex; gap:8px;">
+                    <div id="propColorContainer" class="input-group" style="flex:1;">
+                        <label>Warna Teks / Latar</label>
+                        <input type="color" id="propColor" oninput="updateSelectedObjectProp('color', this.value)" style="height: 38px;">
                     </div>
-                    
-                    <div id="propTextContainer" class="input-group">
-                        <label>Isi Teks / Multi-Baris (Tekan Enter untuk baris baru)</label>
-                        <textarea id="propText" rows="3" oninput="updateSelectedObjectProp('content', this.value)"></textarea>
+                    <div id="propSizeContainer" class="input-group" style="flex:1;">
+                        <label>Ukuran Font</label>
+                        <input type="number" id="propSize" oninput="updateSelectedObjectProp('size', parseInt(this.value))">
                     </div>
-                    <div id="propLinkContainer" class="input-group" style="display:none;">
-                        <label>URL / Link / Galeri (Pisahkan dengan koma)</label>
-                        <input type="text" id="propLink" oninput="updateSelectedObjectProp('url', this.value)">
+                </div>
+                <div style="display: flex; gap:8px;">
+                    <div class="input-group" style="flex:1;"><label>Lebar (px)</label><input type="number" id="propWidth" oninput="updateSelectedObjectProp('width', parseInt(this.value))"></div>
+                    <div class="input-group" style="flex:1;"><label>Tinggi (px)</label><input type="number" id="propHeight" oninput="updateSelectedObjectProp('height', parseInt(this.value))"></div>
+                </div>
+                <div style="display: flex; gap:8px;">
+                    <div class="input-group" style="flex:1;"><label>Opacity</label><input type="number" step="0.1" min="0" max="1" id="propOpacity" oninput="updateSelectedObjectProp('opacity', parseFloat(this.value))"></div>
+                    <div class="input-group" style="flex:1;"><label>Rotasi (°)</label><input type="number" id="propRotation" oninput="updateSelectedObjectProp('rotation', parseInt(this.value))"></div>
+                </div>
+                <div class="input-group" style="display: flex; align-items: center; gap:8px;">
+                    <input type="checkbox" id="propLockRatio" onchange="toggleLockRatio(this.checked)" style="width:18px; height:18px;">
+                    <label for="propLockRatio" style="margin:0; cursor:pointer;">Kunci Rasio Ukuran</label>
+                </div>
+                <div style="display: flex; gap:8px;">
+                    <div id="propFontContainer" class="input-group" style="flex:1;"><label>Font</label>
+                        <select id="propFont" onchange="updateSelectedObjectProp('fontFamily', this.value)">
+                            <option value="sans-serif">Modern</option><option value="serif">Klasik</option><option value="'Brush Script MT', cursive">Tulisan Tangan</option>
+                        </select>
                     </div>
-                    <div id="propImgContainer" class="input-group" style="display:none;">
-                        <label>URL Gambar / Foto</label>
-                        <input type="text" id="propImage" oninput="updateSelectedObjectProp('url', this.value)">
+                    <div class="input-group" style="flex:1;"><label>Animasi</label>
+                        <select id="propAnimation" onchange="updateSelectedObjectProp('animation', this.value)">
+                            <option value="none">Tidak Ada</option><option value="eff-fadeIn">Fade In</option><option value="eff-slideUp">Slide Up</option><option value="eff-slideDown">Slide Down</option><option value="eff-zoomIn">Zoom In</option><option value="eff-typewriter">Typewriter (Ketik)</option>
+                        </select>
                     </div>
-                    <div style="display: flex; gap:8px;">
-                        <div id="propColorContainer" class="input-group" style="flex:1;">
-                            <label>Warna Teks / Latar</label>
-                            <input type="color" id="propColor" oninput="updateSelectedObjectProp('color', this.value)" style="height: 38px;">
-                        </div>
-                        <div id="propSizeContainer" class="input-group" style="flex:1;">
-                            <label>Ukuran Font</label>
-                            <input type="number" id="propSize" oninput="updateSelectedObjectProp('size', parseInt(this.value))">
-                        </div>
-                    </div>
-                    <div style="display: flex; gap:8px;">
-                        <div class="input-group" style="flex:1;"><label>Lebar (px)</label><input type="number" id="propWidth" oninput="updateSelectedObjectProp('width', parseInt(this.value))"></div>
-                        <div class="input-group" style="flex:1;"><label>Tinggi (px)</label><input type="number" id="propHeight" oninput="updateSelectedObjectProp('height', parseInt(this.value))"></div>
-                    </div>
-                    <div style="display: flex; gap:8px;">
-                        <div class="input-group" style="flex:1;"><label>Opacity</label><input type="number" step="0.1" min="0" max="1" id="propOpacity" oninput="updateSelectedObjectProp('opacity', parseFloat(this.value))"></div>
-                        <div class="input-group" style="flex:1;"><label>Rotasi (°)</label><input type="number" id="propRotation" oninput="updateSelectedObjectProp('rotation', parseInt(this.value))"></div>
-                    </div>
-                    <div class="input-group" style="display: flex; align-items: center; gap:8px;">
-                        <input type="checkbox" id="propLockRatio" onchange="toggleLockRatio(this.checked)" style="width:18px; height:18px;">
-                        <label for="propLockRatio" style="margin:0; cursor:pointer;">Kunci Rasio Ukuran</label>
-                    </div>
-                    <div style="display: flex; gap:8px;">
-                        <div id="propFontContainer" class="input-group" style="flex:1;"><label>Font</label>
-                            <select id="propFont" onchange="updateSelectedObjectProp('fontFamily', this.value)">
-                                <option value="sans-serif">Modern</option><option value="serif">Klasik</option><option value="'Brush Script MT', cursive">Tulisan Tangan</option>
-                            </select>
-                        </div>
-                        <div class="input-group" style="flex:1;"><label>Animasi</label>
-                            <select id="propAnimation" onchange="updateSelectedObjectProp('animation', this.value)">
-                                <option value="none">Tidak Ada</option><option value="eff-fadeIn">Fade In</option><option value="eff-slideUp">Slide Up</option><option value="eff-slideDown">Slide Down</option><option value="eff-zoomIn">Zoom In</option><option value="eff-typewriter">Typewriter (Ketik)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div id="propAnimSpeedContainer" class="input-group" style="display:none;">
-                        <label>Kecepatan Typewriter (Detik: 1s - 8s)</label>
-                        <input type="number" id="propAnimSpeed" min="1" max="10" value="3" oninput="updateSelectedObjectProp('animSpeed', parseInt(this.value))">
-                    </div>
+                </div>
+                <div id="propAnimSpeedContainer" class="input-group" style="display:none;">
+                    <label>Kecepatan Typewriter (Detik: 1s - 8s)</label>
+                    <input type="number" id="propAnimSpeed" min="1" max="10" value="3" oninput="updateSelectedObjectProp('animSpeed', parseInt(this.value))">
                 </div>
             </div>
         </div>
@@ -259,7 +257,7 @@ window.addEventListener('beforeunload', function (e) { e.preventDefault(); e.ret
             <button class="bottom-tool" onclick="publishCurrentProject()"><span class="icon">🚀</span>Publish</button>
         </div>
         
-        <!-- Bottom Sheets -->
+        <!-- Bottom Sheets Menu Lainnya -->
         <div id="sheet-add" class="bottom-sheet">
             <div class="sheet-header"><h3>Tambah Objek & Bingkai Foto</h3><button class="sheet-close" onclick="closeSheets()">✕</button></div>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
@@ -325,7 +323,7 @@ window.addEventListener('beforeunload', function (e) { e.preventDefault(); e.ret
 const urlParams = new URLSearchParams(window.location.search);
 const serverPublishId = urlParams.get('id') || "";
 let currentUserId = "USER_" + Math.random().toString(36).substring(2, 9).toUpperCase();
-let currentProject = { projectID: "", version: "1.37.0", elements: [], invitation: {} };
+let currentProject = { projectID: "", version: "1.38.0", elements: [], invitation: {} };
 let selectedElementId = null;
 let multiSelectedIds = [];
 let historyStack = [];
@@ -458,14 +456,14 @@ function migrateData(project) {
         if (el.animation === undefined) el.animation = 'none';
         if (el.animSpeed === undefined) el.animSpeed = 3;
     }); 
-    project.version = "1.37.0";
+    project.version = "1.38.0";
 }
 
 function openEditorWithTemplate(t) {
     let config = typeof t.configJSON === 'string' ? JSON.parse(t.configJSON) : t.configJSON;
     currentProject = { 
         projectID: 'PROJ_' + Math.random().toString(36).substring(2, 8).toUpperCase(), 
-        userId: currentUserId, version: "1.37.0", 
+        userId: currentUserId, version: "1.38.0", 
         invitation: config.invitation || {}, elements: config.elements || [] 
     };
     
@@ -593,7 +591,7 @@ function renderCanvas() {
         div.onpointerdown = function(e) { startDrag(e, el.id); }; 
         canvas.appendChild(div);
     }); 
-    updateSidebar();
+    updatePropertyBottomSheet();
 }
 
 let startX = 0, startY = 0, isDragging = false, activePointerId = null;
@@ -760,18 +758,18 @@ function duplicateSelected() {
 function deleteSelected() { 
     let t = multiSelectedIds.length > 0 ? multiSelectedIds : [selectedElementId]; 
     currentProject.elements = currentProject.elements.filter(function(i) { return !t.includes(i.id); }); 
-    selectedElementId = null; multiSelectedIds = []; saveToHistory(); renderCanvas(); 
+    selectedElementId = null; multiSelectedIds = []; saveToHistory(); renderCanvas(); closeSheets(); 
 }
 
-function updateSidebar() {
-    const sb = document.getElementById('editorSidebar');
-    if (!selectedElementId) { sb.style.display = 'none'; return; }
-    sb.style.display = 'flex';
+function updatePropertyBottomSheet() {
+    const sheet = document.getElementById('propertyBottomSheet');
+    if (!selectedElementId) { sheet.classList.remove('active'); return; }
+    sheet.classList.add('active');
     const el = currentProject.elements.find(function(i) { return i.id === selectedElementId; });
     if (!el) return;
 
-    document.getElementById('btnSidebarLock').innerText = el.locked ? '🔓' : '🔒';
-    document.getElementById('btnSidebarHide').innerText = el.visible === false ? '👁️' : '🕶️';
+    document.getElementById('btnSheetLock').innerHTML = el.locked ? '<span>🔓</span>Buka' : '<span>🔒</span>Kunci';
+    document.getElementById('btnSheetHide').innerHTML = el.visible === false ? '<span>👁️</span>Tampil' : '<span>🕶️</span>Sembunyi';
     document.getElementById('propOpacity').value = el.opacity !== undefined ? el.opacity : 1;
     document.getElementById('propRotation').value = el.rotation || 0;
     document.getElementById('propAnimation').value = el.animation || 'none'; 
@@ -820,7 +818,7 @@ function updateSelectedObjectProp(prop, val) {
 function addObject(type) {
     let maxZ = 1; currentProject.elements.forEach(function(e) { if (e.zIndex > maxZ) maxZ = e.zIndex; }); 
     const newId = 'el_' + Math.random().toString(36).substring(2, 7);
-    let newObj = { id: newId, type: type, x: 90, y: 200, width: 160, height: 60, zIndex: maxZ + 1, rotation: 0, opacity: 1, visible: true, locked: false, lockRatio: false, filter: 'none', animation: 'none', animSpeed: 3 };
+    let newObj = { id: newId, type: type, x: 90, y: 150, width: 160, height: 60, zIndex: maxZ + 1, rotation: 0, opacity: 1, visible: true, locked: false, lockRatio: false, filter: 'none', animation: 'none', animSpeed: 3 };
     
     if (type === 'text') { newObj.content = 'Teks Baru\nBaris Kedua'; newObj.size = 24; newObj.color = '#1e293b'; newObj.fontFamily = 'sans-serif'; }
     else if (type === 'shape') { newObj.color = 'var(--primary)'; }
@@ -831,7 +829,7 @@ function addObject(type) {
     else if (type === 'qr') { newObj.url = 'https://example.com'; newObj.width = 120; newObj.height = 120; } 
     else if (type === 'gift') { newObj.content = 'BCA Rekening'; newObj.width = 200; newObj.height = 80; }
     
-    currentProject.elements.push(newObj); selectedElementId = newId; saveToHistory(); renderCanvas();
+    currentProject.elements.push(newObj); selectedElementId = newId; saveToHistory(); renderCanvas(); closeSheets();
 }
 
 function addPhotoFrame(frameType) {
@@ -839,17 +837,17 @@ function addPhotoFrame(frameType) {
     const newId = 'el_' + Math.random().toString(36).substring(2, 7);
     let newObj = { 
         id: newId, type: frameType === 'polaroid' ? 'frame-polaroid' : 'frame-circle', 
-        x: 80, y: 150, width: 180, height: frameType === 'polaroid' ? 220 : 180, 
+        x: 80, y: 120, width: 180, height: frameType === 'polaroid' ? 220 : 180, 
         zIndex: maxZ + 1, rotation: 0, opacity: 1, visible: true, locked: false, lockRatio: frameType === 'circle', 
         url: 'https://cdn-icons-png.flaticon.com/512/833/833472.png', color: '#4f46e5', animation: 'none', animSpeed: 3 
     };
-    currentProject.elements.push(newObj); selectedElementId = newId; saveToHistory(); renderCanvas();
+    currentProject.elements.push(newObj); selectedElementId = newId; saveToHistory(); renderCanvas(); closeSheets();
 }
 
 function insertAsset(url, type) { 
     let maxZ = 1; currentProject.elements.forEach(function(e) { if (e.zIndex > maxZ) maxZ = e.zIndex; }); 
     const newId = 'el_' + Math.random().toString(36).substring(2, 7); 
-    let newObj = { id: newId, type: type, x: 130, y: 250, width: 90, height: 90, zIndex: maxZ + 1, rotation: 0, opacity: 1, visible: true, locked: false, lockRatio: true, filter: 'none', animation: 'eff-fadeIn', animSpeed: 3, url: url }; 
+    let newObj = { id: newId, type: type, x: 130, y: 200, width: 90, height: 90, zIndex: maxZ + 1, rotation: 0, opacity: 1, visible: true, locked: false, lockRatio: true, filter: 'none', animation: 'eff-fadeIn', animSpeed: 3, url: url }; 
     currentProject.elements.push(newObj); selectedElementId = newId; saveToHistory(); renderCanvas(); closeSheets(); 
 }
 
